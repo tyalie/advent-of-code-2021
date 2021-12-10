@@ -3,6 +3,8 @@
 This will be developed in Rust on a [Teensy 4.1](https://www.pjrc.com/store/teensy41.html) 
 with an ARM Cortex-M7.
 
+Solutions are stored in `src/bin`.
+
 ## Setup
 It is really recommended to go through the Dependencies section of the [`teensy4-rs`
 crate](https://github.com/mciantyre/teensy4-rs/blob/master/README.md#dependencies).
