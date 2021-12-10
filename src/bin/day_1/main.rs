@@ -8,13 +8,16 @@
 
 extern crate alloc;
 
+mod container;
+
 use teensy4_panic as _;
 use cortex_m_rt::entry;
 
-use alloc::string::String;
+use core::fmt::Write;
 
 use aoc21::utils::Hardware;
 
+use container::Sonar;
 
 #[entry]
 fn wrapper() -> ! {
@@ -29,15 +32,13 @@ fn main() -> ! {
 struct Solution {
 }
 
-impl aoc21::solutions::Solution<u32> for Solution {
-    fn parse_file(&self, hardware: &Hardware, in_data: String) -> u32 {
-        return 5;
+impl aoc21::solutions::Solution<Sonar> for Solution {
+    fn part_a(&self, hardware: &mut Hardware, data: &Sonar) {
+        writeln!(hardware.writer, "Parsed {:?} sonar points", data.depths.len()).unwrap();
+        let increases = data.depths.iter().zip(&data.depths[1..]).filter(|(v1, v2)| v1 < v2).count();
+        writeln!(hardware.writer, "- number is {}", increases).unwrap();
     }
 
-    fn part_a(&self, hardware: &Hardware, data: &u32) {
-        panic!("Test");
-    }
-
-    fn part_b(&self, hardware: &Hardware, data: &u32) {
+    fn part_b(&self, hardware: &mut Hardware, data: &Sonar) {
     }
 }
