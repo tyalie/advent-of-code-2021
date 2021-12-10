@@ -35,6 +35,7 @@ impl aoc21::solutions::Solution<u32> for Solution {
     }
 
     fn part_a(&self, hardware: &Hardware, data: &u32) {
+        panic!("Test");
     }
 
     fn part_b(&self, hardware: &Hardware, data: &u32) {
