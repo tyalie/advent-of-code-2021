@@ -49,7 +49,7 @@ pub fn run<O, T>(solution: &mut T) -> ! where T: Solution<O> {
     let in_file =  usb_input::load_input(&mut hardware);
 
     if let Some(data) = in_file {
-        write!(hardware.writer, "{}", data).unwrap();
+        writeln!(hardware.writer, "Loaded file with {:?} chars\n", data.len()).unwrap();
         run_tests(&mut hardware, solution, data);
     } else {
     }
@@ -64,14 +64,15 @@ pub fn run<O, T>(solution: &mut T) -> ! where T: Solution<O> {
 }
 
 fn run_tests<O, T>(hardware: &mut Hardware, solution: &mut T, data: alloc::string::String) where T: Solution<O> {
-    write!(hardware.writer, "Parsing file with input length {:?}", data.len()).unwrap();
+    writeln!(hardware.writer, "-----------------------------------").unwrap();
+    writeln!(hardware.writer, "Parsing file with input length {:?}", data.len()).unwrap();
     let parsed = solution.parse_file(hardware, data);
-    write!(hardware.writer, " - Successfully parsed file").unwrap();
+    writeln!(hardware.writer, " - Successfully parsed file").unwrap();
 
-    write!(hardware.writer, "Running solution part 1").unwrap();
+    writeln!(hardware.writer, "Running solution part 1").unwrap();
     solution.part_a(hardware, &parsed);
 
-    write!(hardware.writer, "Running solution part 2").unwrap();
+    writeln!(hardware.writer, "Running solution part 2").unwrap();
     solution.part_b(hardware, &parsed);
 }
 
