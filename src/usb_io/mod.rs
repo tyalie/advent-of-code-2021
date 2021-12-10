@@ -1,9 +1,11 @@
-//! USB logging support
+//! USB I/O support for nearly all of the USB examples
 //!
-//! If you don't want USB logging, remove
-//!
-//! - this module
-//! - the `log` dependency in Cargo.toml
+//! This module supports a minimum example of how to use
+//! the BSP's USB subsystem. Feel free to copy this module
+//! into your own project.
+
+// A single example might not use all functions in this module.
+#![allow(dead_code)]
 
 use core::cell::RefCell;
 use cortex_m::interrupt::Mutex;
@@ -11,17 +13,6 @@ use cortex_m::interrupt::Mutex;
 use bsp::hal::ral::usb::USB1;
 use bsp::interrupt;
 use teensy4_bsp as bsp;
-
-/// Specify any logging filters here
-///
-/// See the BSP docs for more information
-/// on logging filters.
-const FILTERS: &[bsp::usb::Filter] = &[
-    // Try enabling this filter to only see
-    // log messages from main.rs.
-    //
-    // ("advent_of_code_21", None),
-];
 
 /// Initialize the USB logging system, and prepares the
 /// USB ISR with the poller
@@ -35,16 +26,27 @@ const FILTERS: &[bsp::usb::Filter] = &[
 /// Panics if the imxrt-ral USB1 instance is already taken.
 pub fn init() -> Result<bsp::usb::Reader, bsp::usb::Error> {
     let inst = USB1::take().unwrap();
-    bsp::usb::init(
-        inst,
-        bsp::usb::LoggingConfig {
-            filters: FILTERS,
-            ..Default::default()
-        },
-    )
-    .map(|(poller, reader)| {
+    bsp::usb::init(inst, Default::default()).map(|(poller, reader)| {
         setup(poller);
         reader
+    })
+}
+
+/// Split the USB logging system, and prepares the
+/// USB ISR with the poller
+///
+/// When `split` returns, the USB interrupt will be enabled,
+/// and the host may begin to interface the device.
+/// You should only call this once.
+///
+/// # Panics
+///
+/// Panics if the imxrt-ral USB1 instance is already taken.
+pub fn split() -> Result<(bsp::usb::Reader, bsp::usb::Writer), bsp::usb::Error> {
+    let inst = USB1::take().unwrap();
+    bsp::usb::split(inst).map(|(poller, reader, writer)| {
+        setup(poller);
+        (reader, writer)
     })
 }
 

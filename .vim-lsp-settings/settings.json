@@ -1,0 +1,21 @@
+{
+	"rust-analyzer": {	
+		"initialization_options": {
+			"cargo": {
+				"loadOutDirsFromCheck": true
+			},
+			"procMacro": {
+				"enable": true
+			}
+		},
+		"diagnostics": {
+			"disabled": [
+				"macro-error"
+			]
+		},
+		"cargo": {
+			"allFeatures": true
+		}
+	}
+}
+

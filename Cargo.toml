@@ -1,5 +1,5 @@
 [package]
-name = "advent-of-code-21"
+name = "aoc21"
 version = "0.1.0"
 authors = ["Elisabeth S. Friedrich <elisabeth.s.friedrich@gmail.com>"]
 edition = "2018"
@@ -11,6 +11,8 @@ embedded-hal = "0.2.3"
 # Remove me if you don't want logging
 log = "0.4.11"
 teensy4-panic = "0.2.0"
+heapless = "0.7.8"
+alloc-cortex-m = "0.4.1"
 
 [dependencies.teensy4-bsp]
 version = "0.2"
