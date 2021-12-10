@@ -12,14 +12,14 @@ use core::alloc::Layout;
 
 use super::usb_io;
 use super::utils::usb_input;
-use super::solutions::Solution;
+use super::solutions::{Solution, ParsedData};
 
 pub use super::utils::container::Hardware;
 
 #[global_allocator]
 static ALLOCATOR: CortexMHeap = CortexMHeap::empty();
 
-pub fn run<O, T>(solution: &mut T) -> ! where T: Solution<O> {
+pub fn run<O, T>(solution: &mut T) -> ! where O:ParsedData, T : Solution<O> {
     // init allocator
     let start = cortex_m_rt::heap_start() as usize;
     let size = 1_000_000; // in bytes
@@ -63,10 +63,10 @@ pub fn run<O, T>(solution: &mut T) -> ! where T: Solution<O> {
 
 }
 
-fn run_tests<O, T>(hardware: &mut Hardware, solution: &mut T, data: alloc::string::String) where T: Solution<O> {
+fn run_tests<O, T>(hardware: &mut Hardware, solution: &mut T, data: alloc::string::String) where O: ParsedData, T: Solution<O> {
     writeln!(hardware.writer, "-----------------------------------").unwrap();
     writeln!(hardware.writer, "Parsing file with input length {:?}", data.len()).unwrap();
-    let parsed = solution.parse_file(hardware, data);
+    let parsed = O::parse_file(hardware, data);
     writeln!(hardware.writer, " - Successfully parsed file").unwrap();
 
     writeln!(hardware.writer, "Running solution part 1").unwrap();
