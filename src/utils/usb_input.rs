@@ -20,14 +20,21 @@ const START_CODE: &'static [u8] = b"\xC0\xDEGO";
 ///
 /// # Return
 /// a byte vector of length `num_bytes`
-pub fn read_bytes(reader: &mut bsp::usb::Reader, num_bytes: usize) -> Vec<u8> {
+pub fn read_bytes(reader: &mut bsp::usb::Reader, num_bytes: usize, led: &mut bsp::LED) -> Vec<u8> {
     let mut values: vec::Vec<u8>  = Vec::with_capacity(num_bytes);
     let mut buffer = [0; 1];
+
+    let mut counter = 0_u32;
 
     while values.len() < values.capacity() {
         let bytes_read = reader.read(&mut buffer).unwrap();
         if bytes_read > 0 {
             values.extend(&buffer[..bytes_read]);
+        }
+
+        counter += 1;
+        if counter % 300_000 == 0 {
+            led.toggle();
         }
     }
     return values;
@@ -43,12 +50,12 @@ pub fn read_bytes(reader: &mut bsp::usb::Reader, num_bytes: usize) -> Vec<u8> {
 ///
 /// # Return
 /// the loaded input file
-pub fn load_input(reader: &mut bsp::usb::Reader, writer: &mut bsp::usb::Writer, systick: &mut bsp::SysTick) -> Option<String> {
-    let length = get_input_size(reader, writer, systick);
+pub fn load_input(reader: &mut bsp::usb::Reader, writer: &mut bsp::usb::Writer, systick: &mut bsp::SysTick, led: &mut bsp::LED) -> Option<String> {
+    let length = get_input_size(reader, writer, systick, led);
 
     writeln!(writer, "Waiting for {:?} bytes", length).unwrap();
 
-    let in_file = read_bytes(reader, length);
+    let in_file = read_bytes(reader, length, led);
 
     match alloc::string::String::from_utf8(in_file) {
         Ok(obj) => return Some(obj),
@@ -75,7 +82,7 @@ pub fn load_input(reader: &mut bsp::usb::Reader, writer: &mut bsp::usb::Writer, 
 ///
 /// # Return
 /// the input file size
-fn get_input_size(reader: &mut bsp::usb::Reader, writer: &mut bsp::usb::Writer, systick: &mut bsp::SysTick) -> usize {
+fn get_input_size(reader: &mut bsp::usb::Reader, writer: &mut bsp::usb::Writer, systick: &mut bsp::SysTick, led: &mut bsp::LED) -> usize {
     // Wait for START_CODE so that file can be parsed
     let mut position = 0;
     let mut counter = 0_u8;
@@ -100,10 +107,11 @@ fn get_input_size(reader: &mut bsp::usb::Reader, writer: &mut bsp::usb::Writer, 
 
         if counter % 32 == 0 {
             writeln!(writer, "ready").unwrap();
+            led.toggle();
         }
     }
 
     usize::from_be_bytes(
-        read_bytes(reader, mem::size_of::<usize>()).try_into().unwrap()
+        read_bytes(reader, mem::size_of::<usize>(), led).try_into().unwrap()
     )
 }
