@@ -13,6 +13,7 @@ use teensy4_panic as _;
 use cortex_m_rt::entry;
 
 use alloc_cortex_m::CortexMHeap;
+use core::fmt::Write;
 use core::alloc::Layout;
 
 use aoc21::usb_io;
@@ -31,7 +32,7 @@ fn wrapper() -> ! {
 fn main() -> ! {
     // init allocator
     let start = cortex_m_rt::heap_start() as usize;
-    let size = 1024; // in bytes
+    let size = 1_000_000; // in bytes
     unsafe { ALLOCATOR.init(start, size) }
 
     // do rest
@@ -48,30 +49,17 @@ fn main() -> ! {
     p.ccm.pll1.set_arm_clock(
         bsp::hal::ccm::PLL1::ARM_HZ, &mut p.ccm.handle, &mut p.dcdc
     );
-    // See the `logging` module docs for more info.
-    
-    usb_input::load_input(&mut reader, &mut writer, &mut systick);
+   
+    // load input data
+    let in_file =  usb_input::load_input(&mut reader, &mut writer, &mut systick);
 
-    let mut buffer = [0; 256];
-
-    // load input file
+    if let Some(data) = in_file {
+        write!(writer, "{}", data).unwrap();
+    }
+   
     loop {
-        let bytes_read = reader.read(&mut buffer).unwrap();
-        if bytes_read > 0 {
-            let bytes = &buffer[..bytes_read];
-            match core::str::from_utf8(bytes) {
-                Ok(msg) => log::info!("Received message: {} ({:?})", msg, bytes),
-                Err(e) => log::warn!(
-                    "Read {} bytes, but could not interpret message {:?}: {:?}",
-                    bytes_read, bytes, e
-                ),
-            }
-        }
-
-
         led.toggle();
         systick.delay(500);
-        log::info!("Hello world");
     }
 
 }
