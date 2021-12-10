@@ -22,8 +22,8 @@ impl aoc21::solutions::ParsedData for Sonar {
             }
         };
 
-        return Sonar {
-            depths: in_data.lines().map(num_parse_with_err).collect()
-        }
+        let out = Sonar { depths: in_data.lines().map(num_parse_with_err).collect() };
+        writeln!(hardware.writer, "Parsed {:?} sonar points", out.depths.len()).unwrap();
+        return out;
     }
 }
