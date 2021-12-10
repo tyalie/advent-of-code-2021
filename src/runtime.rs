@@ -46,19 +46,33 @@ pub fn run<O, T>(solution: &mut T) -> ! where O:ParsedData, T : Solution<O> {
     };
 
     // load input data
-    let in_file =  usb_input::load_input(&mut hardware);
-
-    if let Some(data) = in_file {
-        writeln!(hardware.writer, "Loaded file with {:?} chars\n", data.len()).unwrap();
-        run_tests(&mut hardware, solution, data);
-    } else {
-    }
-  
-    let mut flag = 0u8;
     loop {
-        hardware.led.toggle();
-        hardware.systick.delay( if (flag / 2) % 2 == 0 { 600 } else { 300 });
-        flag += 1;
+        let in_file =  usb_input::load_input(&mut hardware);
+
+        if let Some(data) = in_file {
+            writeln!(hardware.writer, "Loaded file with {:?} chars\n", data.len()).unwrap();
+            run_tests(&mut hardware, solution, data);
+        } else {
+        }
+      
+        let mut flag = 0u8;
+        let mut buffer = [0;1];
+        'waiting: loop {
+            hardware.led.toggle();
+            hardware.systick.delay( if (flag / 2) % 2 == 0 { 600 } else { 300 });
+            flag += 1;
+           
+            for _ in 0..256 {
+                if hardware.reader.read(&mut buffer).unwrap() > 0 {
+                    if buffer[0] == b'R' {
+                        writeln!(hardware.writer, "\n\n--------RESTARTING SOLVER----------\n").unwrap();
+                        break 'waiting;
+                    }
+                } else {
+                    break;
+                }
+            }
+        }
     }
 
 }

@@ -39,6 +39,7 @@ def main(in_file: Path, device: Path):
     print(f"writing {len(data)} bytes to {device}")
 
     with open(device, "wb") as d:
+        d.write(b"R")  # Reset code
         d.write(START_CODE)
         d.write(len(data).to_bytes(4, byteorder='big'))
         d.flush()
