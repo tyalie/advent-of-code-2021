@@ -10,7 +10,7 @@ use aoc21::utils::tools::parse_with_err_radix;
 
 pub struct Diagnostic {
     pub report: Vec<u16>,
-    pub num_length: usize
+    pub num_length: usize,
 }
 
 impl aoc21::solutions::ParsedData for Diagnostic {
@@ -29,7 +29,7 @@ impl aoc21::solutions::ParsedData for Diagnostic {
 
         return Diagnostic {
             report: data,
-            num_length: lines[0].len()
+            num_length: lines[0].len(),
         };
     }
 }
