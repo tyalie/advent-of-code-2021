@@ -5,7 +5,6 @@ mod container;
 
 use teensy4_panic as _;
 use cortex_m_rt::entry;
-use core::fmt::Write;
 
 use aoc21::utils::Hardware;
 
@@ -26,8 +25,8 @@ struct Solution {
 }
 
 impl aoc21::solutions::Solution<> for Solution {
-    fn part_a(&self, hardware: &mut Hardware, data: &) {
+    fn part_a(&self, _: &mut Hardware, data: &mut ) {
     }
-    fn part_b(&self, hardware: &mut Hardware, data: &) {
+    fn part_b(&self, _: &mut Hardware, data: &mut ) {
     }
 }

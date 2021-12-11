@@ -9,8 +9,10 @@ use cortex_m_rt::entry;
 use core::fmt::Write;
 
 use aoc21::utils::Hardware;
+use aoc21::usbwriteln;
 
 use container::*;
+
 
 
 #[entry]
@@ -27,10 +29,10 @@ struct Solution {
 }
 
 impl aoc21::solutions::Solution<Diagnostic> for Solution {
-    fn part_a(&self, hardware: &mut Hardware, data: &mut Diagnostic) {
+    fn part_a(&self, _: &mut Hardware, data: &mut Diagnostic) {
         let mut gamma_rate = 0u64;
         for i in (0..data.num_length).rev() {
-            let c = data.report.iter().filter(|v| v.clone() & (1 << i) != 0).count();
+            let c = data.report.iter().filter(|v| *v & (1 << i) != 0).count();
             let mcb = c >= data.report.len() / 2;
 
             gamma_rate = (gamma_rate << 1) | (mcb as u64);
@@ -38,29 +40,29 @@ impl aoc21::solutions::Solution<Diagnostic> for Solution {
 
         let epsilon_rate = (pow(2u64, data.num_length) - 1) ^ gamma_rate;
 
-        writeln!(
-            hardware.writer, "- e:{} * g:{} = {}", 
+        usbwriteln!(
+            "- e:{} * g:{} = {}", 
             epsilon_rate, gamma_rate, epsilon_rate * gamma_rate
-        ).unwrap();
+        );
     }
 
-    fn part_b(&self, hardware: &mut Hardware, data: &mut Diagnostic) {
-        let o2_gen = find_value(hardware, data, false).unwrap();
-        let co2_scrub = find_value(hardware, data, true).unwrap();
+    fn part_b(&self, _: &mut Hardware, data: &mut Diagnostic) {
+        let o2_gen = find_value(data, false).expect("Wasn't able to get single O2 value");
+        let co2_scrub = find_value(data, true).expect("Wasn't able to get single CO2 value");
 
-        writeln!(
-            hardware.writer, "- o:{} * co2:{} = {}", 
+        usbwriteln!(
+            "- o:{} * co2:{} = {}", 
             o2_gen, co2_scrub, o2_gen as u64 * co2_scrub as u64
-        ).unwrap();
+        );
     }
 }
 
 
-fn find_value(_hardware: &mut Hardware, data: &mut Diagnostic, use_lcb: bool) -> Option<u16> {
+fn find_value(data: &mut Diagnostic, use_lcb: bool) -> Option<u16> {
     let mut arr = data.report.clone();
 
     for p in (0..data.num_length).rev() {
-        let c = arr.iter().filter(|v| v.clone() & (1 << p) != 0).count();
+        let c = arr.iter().filter(|v| *v & (1 << p) != 0).count();
         let mcb = (c * 2 >= arr.len()) != use_lcb;
         arr.retain(|v| (v >> p) & 1 == mcb as u16);
 

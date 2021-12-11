@@ -12,6 +12,6 @@ pub struct  {
 }
 
 impl aoc21::solutions::ParsedData for  {
-    fn parse_file(hardware: &mut Hardware, in_data: String) -> Self {
+    fn parse_file(_: &mut Hardware, in_data: String) -> Self {
     }
 }

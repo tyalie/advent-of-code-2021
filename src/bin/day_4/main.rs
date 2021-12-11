@@ -10,6 +10,7 @@ use core::fmt::Write;
 use alloc::vec::Vec;
 
 use aoc21::utils::Hardware;
+use aoc21::usbwriteln;
 
 use container::*;
 
@@ -28,23 +29,19 @@ struct Solution {
 }
 
 impl aoc21::solutions::Solution<Bingo> for Solution {
-    fn part_a(&self, hardware: &mut Hardware, data: &mut Bingo) {
+    fn part_a(&self, _: &mut Hardware, data: &mut Bingo) {
         let (idx, score, _) = data.boards.iter().filter_map(|b| evaluate_board(b, &data.draws))
             .min_by_key(|(idx, _, _)| *idx)
-            .unwrap_or_else(|| {
-                writeln!(hardware.writer, "ERR: No board was finished").unwrap();
-                return (0,0,0);
-        });
-        writeln!(hardware.writer, " - finished board with score {} ({} turns)", score, idx).unwrap();
+            .expect("No board was finished");
+
+        usbwriteln!(" - finished board with score {} ({} turns)", score, idx);
     }
-    fn part_b(&self, hardware: &mut Hardware, data: &mut Bingo) {
+    fn part_b(&self, _: &mut Hardware, data: &mut Bingo) {
         let (idx, score, _) = data.boards.iter().filter_map(|b| evaluate_board(b, &data.draws))
             .max_by_key(|(idx, _, _)| *idx)
-            .unwrap_or_else(|| {
-                writeln!(hardware.writer, "ERR: No board was finished").unwrap();
-                return (0,0,0);
-        });
-        writeln!(hardware.writer, " - finished board with score {} ({} turns)", score, idx).unwrap();
+            .expect("No board was finished");
+
+        usbwriteln!(" - finished board with score {} ({} turns)", score, idx);
     }
 }
 

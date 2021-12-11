@@ -7,7 +7,7 @@ use alloc::string::String;
 
 use aoc21::utils::Hardware;
 use aoc21::utils::tools::parse_with_err;
-
+use aoc21::usbwriteln;
 
 #[derive(PartialEq, Debug)]
 pub enum Command {
@@ -23,20 +23,20 @@ pub struct Course {
 }
 
 impl aoc21::solutions::ParsedData for Course {
-    fn parse_file(hardware: &mut Hardware, in_data: String) -> Self {
+    fn parse_file(_: &mut Hardware, in_data: String) -> Self {
         let commands = in_data.lines()
-            .map(|v: &str| line_to_command(hardware, v)).collect();
+            .map(line_to_command).collect();
 
         return Course { commands: commands };
     }
 }
 
-fn line_to_command(hardware: &mut Hardware, v: &str) -> Command {
+fn line_to_command(v: &str) -> Command {
     let result = if let Some((cmd, num)) = v.split_once(' ') {
         match cmd {
-            "forward" => Command::Forward(parse_with_err(hardware, num)),
-            "down" => Command::Down(parse_with_err(hardware, num)),
-            "up" => Command::Up(parse_with_err(hardware, num)),
+            "forward" => Command::Forward(parse_with_err(num)),
+            "down" => Command::Down(parse_with_err(num)),
+            "up" => Command::Up(parse_with_err(num)),
             _ => Command::NOOP
         }
     } else {
@@ -44,7 +44,7 @@ fn line_to_command(hardware: &mut Hardware, v: &str) -> Command {
     };
 
     if result == Command::NOOP {
-        writeln!(hardware.writer, "ERR parsing {}", v).unwrap();
+        usbwriteln!("ERR parsing {}", v);
     }
     return result;
 }
