@@ -42,5 +42,20 @@ impl aoc21::solutions::Solution<Course> for Solution {
     }
 
     fn part_b(&self, hardware: &mut Hardware, data: &Course) {
+        let (mut pos, mut depth, mut aim) = (0i64, 0i64, 0i64);
+
+        for cmd in &data.commands {
+            match cmd {
+                Command::Down(n) => aim += n.clone() as i64,
+                Command::Up(n) => aim -= n.clone() as i64,
+                Command::Forward(n) => {
+                    pos += n.clone() as i64;
+                    depth += aim * n.clone() as i64
+                },
+                _ => {}
+            };
+        }
+
+        writeln!(hardware.writer, "Final num is {}", pos * depth).unwrap();
     }
 }
