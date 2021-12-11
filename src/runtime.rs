@@ -7,6 +7,7 @@ use teensy4_bsp as bsp;
 use teensy4_panic::sos;
 
 use alloc_cortex_m::CortexMHeap;
+use alloc::string::String;
 use core::fmt::Write;
 use core::alloc::Layout;
 
@@ -109,19 +110,25 @@ fn oom(_: Layout) -> ! {
 #[panic_handler]
 fn panic(info: &core::panic::PanicInfo) -> ! {
     usbwriteln!("\n==== panic occured ====");
-    if let Some(location) = info.location() {
-        usbwriteln!("at '{}':{}", location.file(), location.line());
-    }
-
     if let Some(message) = info.message() {
         usbwriteln!("- {}", message);
     } else {
         usbwriteln!("No reason provided.");
     }
 
-    if let Some(s) = info.payload().downcast_ref::<&str>() {
-        usbwriteln!("Payload: {}", s);
+    if let Some(location) = info.location() {
+        usbwriteln!("at '{}':{}", location.file(), location.line());
     }
+
+    let payload = match info.payload().downcast_ref::<&'static str>() {
+        Some(s) => *s,
+        None => match info.payload().downcast_ref::<String>() {
+            Some(s) => &s[..],
+            None => "Box<dyn Any>",
+        },
+    };
+    usbwriteln!("Payload: '{}'", payload);
+
 
     sos()
 }
