@@ -9,12 +9,12 @@ TARGET_FILE=$(OUT_DIR)/$(bin).hex
 run: build objcopy upload-only
 
 build:
-	@echo "- build file"
+	@echo "- build file for $(bin)"
 	@cargo build --release --bin $(bin)
 	@echo "=== BUILD FINISHED\n"
 
 objcopy:
-	@echo "- Generating hex file"
+	@echo "- Generating hex file for $(bin)"
 	@mkdir -p "$(OUT_DIR)"
 	@cargo objcopy --release --bin $(bin) -- -O ihex "$(TARGET_FILE)"
 
