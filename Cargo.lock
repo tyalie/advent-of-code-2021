@@ -43,6 +43,7 @@ dependencies = [
  "num-traits",
  "teensy4-bsp",
  "teensy4-panic",
+ "tuple",
 ]
 
 [[package]]
@@ -503,6 +504,12 @@ checksum = "79e76b6f0de074cc76c22d3bca8dc51bbfbc53695d8b1d5b70a317334657ebc5"
 dependencies = [
  "imxrt-iomuxc",
 ]
+
+[[package]]
+name = "tuple"
+version = "0.5.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "39a40ba241047e1174c927dc5f61c141a166b938d61a2ff61838441368cc7d0e"
 
 [[package]]
 name = "typenum"
