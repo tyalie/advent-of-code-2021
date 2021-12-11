@@ -27,7 +27,7 @@ static ALLOCATOR: CortexMHeap = CortexMHeap::empty();
 pub fn run<O, T>(solution: &mut T) -> ! where O:ParsedData, T : Solution<O> {
     // init allocator
     let start = cortex_m_rt::heap_start() as usize;
-    let size = 1_000_000; // in bytes
+    let size = 4_000_000; // in bytes
     unsafe { ALLOCATOR.init(start, size) }
 
     // do rest
@@ -95,10 +95,10 @@ fn run_tests<O, T>(hardware: &mut Hardware, solution: &mut T, data: alloc::strin
     let mut parsed = O::parse_file(hardware, data);
     usbwriteln!(" - Successfully parsed file");
 
-    usbwriteln!("Running solution part 1");
+    usbwriteln!("\nRunning solution part 1");
     solution.part_a(hardware, &mut parsed);
 
-    usbwriteln!("Running solution part 2");
+    usbwriteln!("\nRunning solution part 2");
     solution.part_b(hardware, &mut parsed);
 }
 
