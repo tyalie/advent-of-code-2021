@@ -9,6 +9,8 @@ use core::mem as mem;
 
 use super::container::Hardware;
 
+use crate::{usbwriteln};
+
 const START_CODE: &'static [u8] = b"\xC0\xDEGO";
 
 /// Blocked read of specified bytes from serial
@@ -51,17 +53,16 @@ pub fn read_bytes(hardware: &mut Hardware, num_bytes: usize) -> Vec<u8> {
 pub fn load_input(hardware: &mut Hardware) -> Option<String> {
     let length = get_input_size(hardware);
 
-    writeln!(hardware.writer, "Waiting for {:?} bytes", length).unwrap();
+    usbwriteln!("Waiting for {:?} bytes", length);
 
     let in_file = read_bytes(hardware, length);
 
     match alloc::string::String::from_utf8(in_file) {
         Ok(obj) => return Some(obj),
         Err(e) => {
-            writeln!(
-                hardware.writer, "Error parsing input file with len {} ({:?})",
-                length, e
-            ).unwrap();
+            usbwriteln!(
+                "Error parsing input file with len {} ({:?})", length, e
+            );
             return None;
         }
     }
@@ -102,7 +103,7 @@ fn get_input_size(hardware: &mut Hardware) -> usize {
         hardware.systick.delay(10);
 
         if counter % 32 == 0 {
-            writeln!(hardware.writer, "ready").unwrap();
+            usbwriteln!("ready");
             hardware.led.toggle();
         }
     }

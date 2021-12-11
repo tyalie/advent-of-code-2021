@@ -4,11 +4,14 @@
 extern crate alloc;
 
 use teensy4_bsp as bsp;
-use teensy4_panic as _;
+use teensy4_panic::sos;
 
 use alloc_cortex_m::CortexMHeap;
 use core::fmt::Write;
 use core::alloc::Layout;
+
+use crate::usbwrite;
+use crate::usbwriteln;
 
 use super::usb_io;
 use super::utils::usb_input;
@@ -19,6 +22,7 @@ pub use super::utils::container::Hardware;
 #[global_allocator]
 static ALLOCATOR: CortexMHeap = CortexMHeap::empty();
 
+
 pub fn run<O, T>(solution: &mut T) -> ! where O:ParsedData, T : Solution<O> {
     // init allocator
     let start = cortex_m_rt::heap_start() as usize;
@@ -28,9 +32,14 @@ pub fn run<O, T>(solution: &mut T) -> ! where O:ParsedData, T : Solution<O> {
     // do rest
     let mut p = bsp::Peripherals::take().unwrap();
     let mut systick = bsp::SysTick::new(cortex_m::Peripherals::take().unwrap().SYST);
-    let (reader, writer) = usb_io::split().unwrap();
+    let (reader, writer) = usb_io::usb_init::split().unwrap();
 
-    log::error!("You might not see this message if the USB device isn't configured by the host");
+    cortex_m::interrupt::free(|cs| {
+        *usb_io::WRITER.borrow(cs).borrow_mut() = Some(writer);
+    });
+    // unsafe { WRITER = Some(writer) };
+
+    usbwrite!("You might not see this message if the USB device isn't configured by the host");
     systick.delay(1000);
 
     let pins = bsp::t41::into_pins(p.iomuxc);
@@ -40,9 +49,11 @@ pub fn run<O, T>(solution: &mut T) -> ! where O:ParsedData, T : Solution<O> {
         bsp::hal::ccm::PLL1::ARM_HZ, &mut p.ccm.handle, &mut p.dcdc
     );
 
+    usbwrite!("Hello");
+
     let mut hardware = Hardware {
         led: led, systick: systick,
-        reader: reader, writer: writer,
+        reader: reader,
     };
 
     // load input data
@@ -50,7 +61,7 @@ pub fn run<O, T>(solution: &mut T) -> ! where O:ParsedData, T : Solution<O> {
         let in_file =  usb_input::load_input(&mut hardware);
 
         if let Some(data) = in_file {
-            writeln!(hardware.writer, "Loaded file with {:?} chars\n", data.len()).unwrap();
+            usbwriteln!("Loaded file with {:?} chars\n", data.len());
             run_tests(&mut hardware, solution, data);
         } else {
         }
@@ -65,7 +76,7 @@ pub fn run<O, T>(solution: &mut T) -> ! where O:ParsedData, T : Solution<O> {
             for _ in 0..256 {
                 if hardware.reader.read(&mut buffer).unwrap() > 0 {
                     if buffer[0] == b'R' {
-                        writeln!(hardware.writer, "\n\n--------RESTARTING SOLVER----------\n").unwrap();
+                        usbwriteln!("\n\n--------RESTARTING SOLVER----------\n");
                         break 'waiting;
                     }
                 } else {
@@ -78,19 +89,39 @@ pub fn run<O, T>(solution: &mut T) -> ! where O:ParsedData, T : Solution<O> {
 }
 
 fn run_tests<O, T>(hardware: &mut Hardware, solution: &mut T, data: alloc::string::String) where O: ParsedData, T: Solution<O> {
-    writeln!(hardware.writer, "-----------------------------------").unwrap();
-    writeln!(hardware.writer, "Parsing file with input length {:?}", data.len()).unwrap();
+    usbwriteln!("-----------------------------------");
+    usbwriteln!("Parsing file with input length {:?}", data.len());
     let mut parsed = O::parse_file(hardware, data);
-    writeln!(hardware.writer, " - Successfully parsed file").unwrap();
+    usbwriteln!(" - Successfully parsed file");
 
-    writeln!(hardware.writer, "Running solution part 1").unwrap();
+    usbwriteln!("Running solution part 1");
     solution.part_a(hardware, &mut parsed);
 
-    writeln!(hardware.writer, "Running solution part 2").unwrap();
+    usbwriteln!("Running solution part 2");
     solution.part_b(hardware, &mut parsed);
 }
 
 #[alloc_error_handler]
 fn oom(_: Layout) -> ! {
-    panic!();
+    panic!("Alloc error handler called");
+}
+
+#[panic_handler]
+fn panic(info: &core::panic::PanicInfo) -> ! {
+    usbwriteln!("\n==== panic occured ====");
+    if let Some(location) = info.location() {
+        usbwriteln!("at '{}':{}", location.file(), location.line());
+    }
+
+    if let Some(message) = info.message() {
+        usbwriteln!("- {}", message);
+    } else {
+        usbwriteln!("No reason provided.");
+    }
+
+    if let Some(s) = info.payload().downcast_ref::<&str>() {
+        usbwriteln!("Payload: {}", s);
+    }
+
+    sos()
 }
