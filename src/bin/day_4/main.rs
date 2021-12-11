@@ -29,7 +29,6 @@ struct Solution {
 
 impl aoc21::solutions::Solution<Bingo> for Solution {
     fn part_a(&self, hardware: &mut Hardware, data: &mut Bingo) {
-        
         let (idx, score, _) = data.boards.iter().filter_map(|b| evaluate_board(b, &data.draws))
             .min_by_key(|(idx, _, _)| *idx)
             .unwrap_or_else(|| {
@@ -39,6 +38,13 @@ impl aoc21::solutions::Solution<Bingo> for Solution {
         writeln!(hardware.writer, " - finished board with score {} ({} turns)", score, idx).unwrap();
     }
     fn part_b(&self, hardware: &mut Hardware, data: &mut Bingo) {
+        let (idx, score, _) = data.boards.iter().filter_map(|b| evaluate_board(b, &data.draws))
+            .max_by_key(|(idx, _, _)| *idx)
+            .unwrap_or_else(|| {
+                writeln!(hardware.writer, "ERR: No board was finished").unwrap();
+                return (0,0,0);
+        });
+        writeln!(hardware.writer, " - finished board with score {} ({} turns)", score, idx).unwrap();
     }
 }
 
