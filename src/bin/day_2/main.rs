@@ -26,7 +26,7 @@ struct Solution {
 }
 
 impl aoc21::solutions::Solution<Course> for Solution {
-    fn part_a(&self, hardware: &mut Hardware, data: &Course) {
+    fn part_a(&self, hardware: &mut Hardware, data: &mut Course) {
         let (mut pos, mut depth) = (0i32, 0i32);
 
         for cmd in &data.commands {
@@ -41,7 +41,7 @@ impl aoc21::solutions::Solution<Course> for Solution {
         writeln!(hardware.writer, "Final num is {}", pos * depth).unwrap();
     }
 
-    fn part_b(&self, hardware: &mut Hardware, data: &Course) {
+    fn part_b(&self, hardware: &mut Hardware, data: &mut Course) {
         let (mut pos, mut depth, mut aim) = (0i64, 0i64, 0i64);
 
         for cmd in &data.commands {

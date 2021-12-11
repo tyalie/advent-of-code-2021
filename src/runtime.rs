@@ -80,14 +80,14 @@ pub fn run<O, T>(solution: &mut T) -> ! where O:ParsedData, T : Solution<O> {
 fn run_tests<O, T>(hardware: &mut Hardware, solution: &mut T, data: alloc::string::String) where O: ParsedData, T: Solution<O> {
     writeln!(hardware.writer, "-----------------------------------").unwrap();
     writeln!(hardware.writer, "Parsing file with input length {:?}", data.len()).unwrap();
-    let parsed = O::parse_file(hardware, data);
+    let mut parsed = O::parse_file(hardware, data);
     writeln!(hardware.writer, " - Successfully parsed file").unwrap();
 
     writeln!(hardware.writer, "Running solution part 1").unwrap();
-    solution.part_a(hardware, &parsed);
+    solution.part_a(hardware, &mut parsed);
 
     writeln!(hardware.writer, "Running solution part 2").unwrap();
-    solution.part_b(hardware, &parsed);
+    solution.part_b(hardware, &mut parsed);
 }
 
 #[alloc_error_handler]

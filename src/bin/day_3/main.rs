@@ -27,7 +27,7 @@ struct Solution {
 }
 
 impl aoc21::solutions::Solution<Diagnostic> for Solution {
-    fn part_a(&self, hardware: &mut Hardware, data: &Diagnostic) {
+    fn part_a(&self, hardware: &mut Hardware, data: &mut Diagnostic) {
         let mut gamma_rate = 0u64;
         for i in 0..data.num_length {
             let c = data.report.iter().filter(|v| v.clone() & (1 << i) != 0).count();
@@ -44,6 +44,7 @@ impl aoc21::solutions::Solution<Diagnostic> for Solution {
         ).unwrap();
     }
 
-    fn part_b(&self, hardware: &mut Hardware, data: &Diagnostic) {
+    fn part_b(&self, hardware: &mut Hardware, data: &mut Diagnostic) {
+
     }
 }

@@ -8,6 +8,6 @@ pub trait ParsedData {
 }
 
 pub trait Solution<T: ParsedData> {
-    fn part_a(&self, hardware: &mut Hardware, data: &T);
-    fn part_b(&self, hardware: &mut Hardware, data: &T);
+    fn part_a(&self, hardware: &mut Hardware, data: &mut T);
+    fn part_b(&self, hardware: &mut Hardware, data: &mut T);
 }
