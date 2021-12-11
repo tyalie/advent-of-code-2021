@@ -28,16 +28,15 @@ struct Solution {
 
 impl aoc21::solutions::Solution<Diagnostic> for Solution {
     fn part_a(&self, hardware: &mut Hardware, data: &Diagnostic) {
-        let size = data.report[0].len();
         let mut gamma_rate = 0u64;
-        for i in 0..size {
-            let c = data.report.iter().filter(|v| v[i]).count();
+        for i in 0..data.num_length {
+            let c = data.report.iter().filter(|v| v.clone() & (1 << i) != 0).count();
             let mcb = c >= data.report.len() / 2;
 
             gamma_rate = (gamma_rate << 1) | (mcb as u64);
         }
 
-        let epsilon_rate = (pow(2u64, size) - 1) ^ gamma_rate;
+        let epsilon_rate = (pow(2u64, data.num_length) - 1) ^ gamma_rate;
 
         writeln!(
             hardware.writer, "- e:{} * g:{} = {}", 
