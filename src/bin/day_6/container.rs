@@ -1,11 +1,10 @@
 extern crate alloc;
 
 use core::convert::TryInto;
-use core::fmt::{Write, Debug};
+use core::fmt::Debug;
 
 use alloc::vec::Vec;
 use alloc::string::String;
-use aoc21::usbwriteln;
 use aoc21::utils::tools::parse_with_err;
 use num_traits::int::PrimInt;
 use aoc21::utils::Hardware;
