@@ -7,11 +7,12 @@ mod container;
 
 use teensy4_panic as _;
 use cortex_m_rt::entry;
-use alloc::vec;
+use alloc::collections::BTreeSet;
 use alloc::vec::Vec;
 use core::fmt::Write;
 
 use aoc21::{utils::Hardware, usbwriteln, usbwrite};
+use aoc21::runtime::ALLOCATOR;
 
 use container::*;
 
@@ -30,28 +31,33 @@ struct Solution {
 }
 
 impl aoc21::solutions::Solution<Vents> for Solution {
-    fn part_a(&self, _: &mut Hardware, data: &mut Vents) {
-        usbwriteln!("Working with {} lines", data.lines.len());
-        // I know that field is that size
-        let mut field = vec!(vec!(0u8; 1000); 1000);
-        usbwriteln!("Init playing field");
+    fn part_a(&self, hardware: &mut Hardware, data: &mut Vents) {
+        let lines: Vec<Line> = data.lines.iter().filter(|l| l.is_straight()).cloned().collect();
+        let num = lines.iter().filter(|l| l.is_straight()).flat_map(|l| l.into_iter()).count();
+        usbwriteln!("Memory: free: {} | used: {}", ALLOCATOR.free(), ALLOCATOR.used());
+        usbwriteln!("Iterating over {} points from {} lines", num, lines.len());
 
-//        let mut field: [[u8; 1000]; 1000] = [[0; 1000]; 1000];
         let mut count = 0;
+        let mut locations: BTreeSet<Point<u16>> = BTreeSet::new();
+        let steps = core::cmp::max(lines.len() / 20, 1);
 
-        for line in data.lines.iter().filter(|l| l.is_straight()) {
-            for pos in line.into_iter() {
-                let pos_i = Point { x: pos.x as usize, y: pos.y as usize };
-                if field[pos_i.x][pos_i.y] < 2 {
-                    field[pos_i.x][pos_i.y] += 1;
-                }
-                if field[pos_i.x][pos_i.y] == 1 {
-                    count += 1;
+        for (idx, line) in lines[..lines.len() - 1].iter().enumerate() {
+            hardware.led.toggle();
+            if idx % steps == 0 {
+                usbwriteln!(" - {} / {} lines ({})", idx, lines.len(), locations.len());
+            }
+
+            for point_a in line.into_iter() {
+                for point_b in lines[(idx+1)..].iter().flat_map(|l| l.into_iter()) {
+                    if point_a == point_b && !locations.contains(&point_a) {
+                        locations.insert(point_a);
+                        count += 1;
+                    }
                 }
             }
         }
 
-        usbwriteln!("- Found {} positions with multiple lines across", count);
+        usbwriteln!("\n- Found {} positions with multiple lines across ({} hits)", locations.len(), count);
     }
     fn part_b(&self, _: &mut Hardware, data: &mut Vents) {
     }

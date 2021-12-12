@@ -35,7 +35,7 @@ impl aoc21::solutions::ParsedData for Vents {
 
 // Own Types
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Point<T> where T: PrimInt {
     pub x: T,
     pub y: T 
@@ -58,7 +58,7 @@ pub struct Vector {
     pub y: i32
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Line {
     pub start: Point<u16>,
     pub stop: Point<u16>
