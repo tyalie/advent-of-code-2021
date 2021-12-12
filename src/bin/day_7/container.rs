@@ -1,6 +1,5 @@
 extern crate alloc;
 
-use core::fmt::Write;
 use core::ops::Range;
 
 use alloc::vec::Vec;
