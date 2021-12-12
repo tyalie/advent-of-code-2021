@@ -39,6 +39,7 @@ dependencies = [
  "cortex-m-rt",
  "embedded-hal",
  "heapless",
+ "itertools",
  "log",
  "num-traits",
  "teensy4-bsp",
@@ -178,6 +179,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "either"
+version = "1.6.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e78d4f1cc4ae33bbfc157ed5d5a5ef3bc29227303d595861deb238fcec4e9457"
+
+[[package]]
 name = "embedded-hal"
 version = "0.2.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -286,6 +293,15 @@ checksum = "d1c184a0e9a27dcdd06c2455bf2764227cf86e6106dcf4127878b1768fb4acb5"
 dependencies = [
  "bare-metal 0.2.5",
  "cortex-m 0.6.7",
+]
+
+[[package]]
+name = "itertools"
+version = "0.10.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a9a9d19fa1e79b6215ff29b9d6880b706147f16e9b1dbb1e4e5947b5b02bc5e3"
+dependencies = [
+ "either",
 ]
 
 [[package]]
