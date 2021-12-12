@@ -21,13 +21,13 @@ use super::solutions::{Solution, ParsedData};
 pub use super::utils::container::Hardware;
 
 #[global_allocator]
-static ALLOCATOR: CortexMHeap = CortexMHeap::empty();
+pub static ALLOCATOR: CortexMHeap = CortexMHeap::empty();
 
 
 pub fn run<O, T>(solution: &mut T) -> ! where O:ParsedData, T : Solution<O> {
     // init allocator
     let start = cortex_m_rt::heap_start() as usize;
-    let size = 4_000_000; // in bytes
+    let size = 500_000; // in bytes
     unsafe { ALLOCATOR.init(start, size) }
 
     // do rest
@@ -62,6 +62,7 @@ pub fn run<O, T>(solution: &mut T) -> ! where O:ParsedData, T : Solution<O> {
         let in_file =  usb_input::load_input(&mut hardware);
 
         if let Some(data) = in_file {
+            usbwriteln!("Initialized head with {} bytes at {}", size, start);
             usbwriteln!("Loaded file with {:?} chars\n", data.len());
             run_tests(&mut hardware, solution, data);
         } else {
