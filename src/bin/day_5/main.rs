@@ -11,7 +11,7 @@ use alloc::collections::BTreeSet;
 use alloc::vec::Vec;
 use core::fmt::Write;
 
-use aoc21::{utils::Hardware, usbwriteln, usbwrite};
+use aoc21::{utils::Hardware, usbwriteln};
 use aoc21::runtime::ALLOCATOR;
 
 use container::*;
@@ -33,7 +33,20 @@ struct Solution {
 impl aoc21::solutions::Solution<Vents> for Solution {
     fn part_a(&self, hardware: &mut Hardware, data: &mut Vents) {
         let lines: Vec<Line> = data.lines.iter().filter(|l| l.is_straight()).cloned().collect();
-        let num = lines.iter().filter(|l| l.is_straight()).flat_map(|l| l.into_iter()).count();
+        let (intersections, hits) = self.determine_intersections(hardware, &lines);
+        usbwriteln!("\n- Found {} positions with multiple lines across ({} hits)", intersections, hits);
+    }
+
+    fn part_b(&self, hardware: &mut Hardware, data: &mut Vents) {
+        let (intersections, hits) = self.determine_intersections(hardware, &data.lines);
+        usbwriteln!("\n- Found {} positions with multiple lines across ({} hits)", intersections, hits);
+    }
+}
+
+impl Solution {
+    fn determine_intersections(&self, hardware: &mut Hardware, lines: &Vec<Line>) -> (usize, u32) {
+        let num = lines.iter().flat_map(|l| l.into_iter()).count();
+
         usbwriteln!("Memory: free: {} | used: {}", ALLOCATOR.free(), ALLOCATOR.used());
         usbwriteln!("Iterating over {} points from {} lines", num, lines.len());
 
@@ -49,16 +62,19 @@ impl aoc21::solutions::Solution<Vents> for Solution {
 
             for point_a in line.into_iter() {
                 for point_b in lines[(idx+1)..].iter().flat_map(|l| l.into_iter()) {
-                    if point_a == point_b && !locations.contains(&point_a) {
-                        locations.insert(point_a);
-                        count += 1;
+                    if point_a == point_b {
+                        if !locations.contains(&point_a) {
+                            locations.insert(point_a);
+                        }
+                        count += 1
                     }
                 }
             }
         }
 
-        usbwriteln!("\n- Found {} positions with multiple lines across ({} hits)", locations.len(), count);
-    }
-    fn part_b(&self, _: &mut Hardware, data: &mut Vents) {
+        return (locations.len(), count);
+
     }
 }
+
+
