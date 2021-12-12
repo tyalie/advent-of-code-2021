@@ -37,19 +37,40 @@ pub struct Display {
     pub number: [Digit; 4]
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Digit {
-    pub on_segments: u8
+    pub on_segments: [bool; 7]
 }
 
 impl Digit {
     pub fn from_str(value: &str) -> Self {
-        let mut on_segs = 0;
-        value.bytes().for_each(|b| on_segs |= 1 << (b - b'a') );
+        let mut on_segs = [false; 7];
+        value.bytes().for_each(|b| on_segs[(b - b'a') as usize] = true );
         return Digit { on_segments: on_segs };
     }
 
     pub fn count_on(&self) -> u8 {
-        self.on_segments.count_ones() as u8
+        self.on_segments.iter().filter(|&&v| v).count() as u8
+    }
+
+    pub fn to_num(&self) -> Option<u8> {
+        let permutations: [u8; 10] = [  // all digits in the order 0..9
+            0b1110111, 0b0100100,
+            0b1011101, 0b1101101,
+            0b0101110, 0b1101011,
+            0b1111011, 0b0100101,
+            0b1111111, 0b1101111
+        ];
+
+        let digit: u8 = self.clone().into();
+        permutations.iter().position(|&v| digit == v).map(|v| v as u8)
+    }
+}
+
+impl Into<u8> for Digit {
+    fn into(self) -> u8 {
+        let mut out: u8 = 0;
+        self.on_segments.iter().rev().for_each(|&e| { out <<= 1; out |= e as u8; });
+        return out;
     }
 }
