@@ -28,7 +28,8 @@ struct Solution {
 
 impl aoc21::solutions::Solution<Caves> for Solution {
     fn part_a(&self, _: &mut Hardware, data: &mut Caves) {
-        usbwriteln!("{:?}", data.graph);
+        let num_paths = data.graph.find_simple_paths("start", "end");
+        usbwriteln!(" - found {} paths through cave", num_paths);
     }
 
     fn part_b(&self, _: &mut Hardware, data: &mut Caves) {
