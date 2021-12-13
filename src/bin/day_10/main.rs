@@ -30,8 +30,12 @@ struct Solution {
 
 impl aoc21::solutions::Solution<NavigationSub> for Solution {
     fn part_a(&self, _: &mut Hardware, data: &mut NavigationSub) {
-        let score: u32 = data.lines.iter()
-            .filter_map(get_corrupted_indicator)
+        let eval_lines: Vec<(Option<Vec<u8>>, Option<u8>)> = data.lines.iter()
+            .map(|line| get_corrupted_indicator(line))
+            .collect();
+
+        let score: u32 = eval_lines.iter()
+            .filter_map(|&(_, v)| v)
             .map(|v| {
                 match v {
                     b')' => 3,
@@ -42,13 +46,31 @@ impl aoc21::solutions::Solution<NavigationSub> for Solution {
                 }
             }).sum();
 
+        data.evaled_lines = eval_lines;
+
         usbwriteln!(" - final score is {}", score);
     }
     fn part_b(&self, _: &mut Hardware, data: &mut NavigationSub) {
+        let mut scores: Vec<u64> = data.evaled_lines.iter()
+            .filter_map(|(v, _)| v.as_ref())
+            .map(|line| {
+                line.iter().rev().map(|v| 
+                    match v {
+                        b'(' => 1,
+                        b'[' => 2,
+                        b'{' => 3,
+                        b'<' => 4,
+                        _ => panic!("Unknown symbol {}", v)
+                    }).fold(0u64, |a, v| a * 5 + v)
+            }).collect();
+        scores.sort();
+        assert_eq!(scores.len() % 2, 1, "Number of scored lines shouldn't be even");
+
+        usbwriteln!(" - mid score of all is {}", scores[scores.len() / 2]);
     }
 }
 
-fn get_corrupted_indicator(line: &String) -> Option<u8> {
+fn get_corrupted_indicator(line: &String) -> (Option<Vec<u8>>, Option<u8>) {
     let mut storage: Vec<u8> = Vec::with_capacity(line.len());
     let (opening, closing) = (b"([{<", b")]}>");
 
@@ -60,14 +82,14 @@ fn get_corrupted_indicator(line: &String) -> Option<u8> {
                 == get_index(&mut closing.iter(), b) {
                 storage.pop();
             } else {
-                return Some(b);
+                return (None, Some(b));
             }
         } else {
             panic!("Unknown character encoutered: {}", b);
         }
     }
 
-    None
+    (Some(storage), None)
 }
 
 fn get_index<T>(arr: &mut Iter<T>, element: T) -> Option<usize> where T: Eq {
