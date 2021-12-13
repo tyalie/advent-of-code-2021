@@ -1,8 +1,8 @@
 extern crate alloc;
 
+use core::convert::TryInto;
 use core::fmt::{Display, Formatter};
 
-use alloc::vec;
 use alloc::vec::Vec;
 use alloc::string::String;
 use aoc21::utils::Hardware;
@@ -44,6 +44,21 @@ impl CaveMap {
         }
 
         self.floor.get(row as usize)?.get(col as usize)
+    }
+
+    pub fn get_adjacents(&self, row: i32, col: i32) -> [Option<(u16, u16)>; 4] {
+        let adjacent_fields = [(1, 0), (0, 1), (-1, 0), (0, -1)];
+
+        return adjacent_fields.iter()
+            .map(|a| (row + a.0, col + a.1))
+            .map(|pos| {
+                if pos.0 < 0 || pos.0 as usize >= self.floor.len() 
+                    || pos.1 < 0 || pos.1 as usize >= self.floor[0].len() {
+                    None
+                } else {
+                    Some((pos.0 as u16, pos.1 as u16))
+                }
+            }).collect::<Vec<Option<(u16, u16)>>>().try_into().unwrap();
     }
 
     pub fn nrows(&self) -> usize {
