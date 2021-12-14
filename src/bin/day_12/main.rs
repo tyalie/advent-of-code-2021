@@ -4,7 +4,6 @@
 mod container;
 mod graph;
 
-use num_traits::ToPrimitive;
 use teensy4_panic as _;
 use cortex_m_rt::entry;
 use core::fmt::Write;

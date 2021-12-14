@@ -4,8 +4,6 @@ use core::fmt::Debug;
 use alloc::{collections::BTreeMap, vec};
 use alloc::vec::Vec;
 use alloc::string::String;
-use aoc21::usbwriteln;
-use core::fmt::Write;
 use num_traits::{int::PrimInt, Unsigned, ToPrimitive};
 use tuple::Map;
 
