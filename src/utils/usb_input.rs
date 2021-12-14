@@ -99,7 +99,7 @@ fn get_input_size(hardware: &mut Hardware) -> usize {
             }
         }
 
-        counter += 1;
+        counter = counter.wrapping_add(1);
         hardware.systick.delay(10);
 
         if counter % 32 == 0 {

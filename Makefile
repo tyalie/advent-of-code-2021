@@ -10,13 +10,13 @@ run: build objcopy upload-only
 
 build:
 	@echo "- build file for $(bin)"
-	@cargo build --release --bin $(bin)
+	@cargo build --bin $(bin)
 	@echo "=== BUILD FINISHED\n"
 
 objcopy:
 	@echo "- Generating hex file for $(bin)"
 	@mkdir -p "$(OUT_DIR)"
-	@cargo objcopy --release --bin $(bin) -- -O ihex "$(TARGET_FILE)"
+	@cargo objcopy --bin $(bin) -- -O ihex "$(TARGET_FILE)"
 
 upload-only:
 	@echo "\n========UPLOAD========="

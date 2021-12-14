@@ -25,3 +25,6 @@ features = ["rt"]
 # Helps with build times.
 [profile.release.build-override]
 opt-level = 0
+
+[profile.dev]
+opt-level = 2
