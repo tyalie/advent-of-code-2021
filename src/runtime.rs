@@ -73,7 +73,7 @@ pub fn run<O, T>(solution: &mut T) -> ! where O:ParsedData, T : Solution<O> {
         'waiting: loop {
             hardware.led.toggle();
             hardware.systick.delay( if (flag / 2) % 2 == 0 { 600 } else { 300 });
-            flag += 1;
+            flag = flag.wrapping_add(1);
            
             for _ in 0..256 {
                 if hardware.reader.read(&mut buffer).unwrap() > 0 {
