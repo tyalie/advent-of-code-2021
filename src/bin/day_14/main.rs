@@ -29,17 +29,10 @@ struct Solution {
 
 impl aoc21::solutions::Solution<Polymerization> for Solution {
     fn part_a(&self, _: &mut Hardware, data: &mut Polymerization) {
-        let mut poly = Polymer::from(&data.polymer);
-        for _ in 0..10 {
-            poly = poly.do_step(&data.insertion_rules);
-        }
-
-        let counted = poly.count_elements();
-        let score = counted.values().max().unwrap() - counted.values().min().unwrap();
-
-        usbwriteln!(" - most common - least common = {}", score);
+        run_test(data, 10);
     }
     fn part_b(&self, _: &mut Hardware, data: &mut Polymerization) {
+        run_test(data, 40);
     }
 }
 
@@ -58,4 +51,17 @@ impl Polymer {
 
         return new_poly;
     }
+}
+
+fn run_test(data: &Polymerization, steps: usize) {
+    let mut poly = Polymer::from(&data.polymer);
+    for _ in 0..steps {
+        poly = poly.do_step(&data.insertion_rules);
+    }
+
+    let counted = poly.count_elements();
+    let min = counted.values().min().unwrap();
+    let max = counted.values().max().unwrap();
+
+    usbwriteln!(" - after {} steps: {} - {} = {}", steps, max, min, max - min);
 }

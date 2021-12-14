@@ -43,13 +43,13 @@ impl aoc21::solutions::ParsedData for Polymerization {
 #[derive(Clone)]
 pub struct Polymer {
     pub ends: [u8; 2],
-    pub pairs: BTreeMap<[u8; 2], u16>
+    pub pairs: BTreeMap<[u8; 2], u64>
 }
 
 impl From<&Vec<u8>> for Polymer {
     /// Create a Polymer from an input vector of u8
     fn from(input: &Vec<u8>) -> Self {
-        let mut buckets: BTreeMap<[u8; 2], u16> = BTreeMap::new();
+        let mut buckets: BTreeMap<[u8; 2], u64> = BTreeMap::new();
         input.iter().zip(input.iter().skip(1))
             .map(|(a,b)| [*a, *b])
             .for_each(|pair| {
@@ -79,8 +79,8 @@ impl Polymer {
         Polymer { ends: *ends, pairs: BTreeMap::new() }
     }
 
-    pub fn count_elements(&self) -> BTreeMap<u8, u16> {
-        let mut count: BTreeMap<u8, u16> = BTreeMap::new();
+    pub fn count_elements(&self) -> BTreeMap<u8, u64> {
+        let mut count: BTreeMap<u8, u64> = BTreeMap::new();
 
         self.ends.iter().for_each(|v| { count.insert(*v, 1); });
 
