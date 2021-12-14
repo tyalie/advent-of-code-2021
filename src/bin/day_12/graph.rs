@@ -4,17 +4,19 @@ use core::fmt::Debug;
 use alloc::{collections::BTreeMap, vec};
 use alloc::vec::Vec;
 use alloc::string::String;
+use aoc21::usbwriteln;
+use core::fmt::Write;
 use num_traits::{int::PrimInt, Unsigned, ToPrimitive};
 use tuple::Map;
 
 
 pub struct Graph<T> where T: PrimInt + Unsigned + ToPrimitive {
-    nodes: Vec<String>,
+    pub nodes: Vec<String>,
     is_small: Vec<bool>,
     adjacent_nodes: BTreeMap<T, Vec<T>>
 }
 
-impl<T> Graph<T> where T: PrimInt + Unsigned + ToPrimitive + Copy {
+impl<T> Graph<T> where T: PrimInt + Unsigned + ToPrimitive + Copy + Debug {
     fn insert_adjacent(&mut self, from: &T, to: &T) {
         self.adjacent_nodes
             .entry(*from)
@@ -55,6 +57,10 @@ impl<T> Graph<T> where T: PrimInt + Unsigned + ToPrimitive + Copy {
         T::from(self.nodes.iter().position(|v| v == node)?)
     }
 
+    pub fn is_node_small(&self, node: &str) -> bool {
+        self.is_small[self.node_to_index(node).unwrap().to_usize().unwrap()]
+    }
+
     fn neighbors(&self, node: &T) -> impl Iterator<Item = &T> {
         self.adjacent_nodes.get(node)
             .map(|neighs| neighs as &[T])
@@ -64,34 +70,44 @@ impl<T> Graph<T> where T: PrimInt + Unsigned + ToPrimitive + Copy {
 
     /// # find all simple paths algorithm
     /// Adopted from https://www.baeldung.com/cs/simple-paths-between-two-vertices
-    pub fn find_simple_paths(&self, start: &str, end: &str) -> u16 {
+    pub fn find_simple_paths(&self, start: &str, end: &str, visiting_twice: Option<&str>) -> u32 {
         let start = self.node_to_index(start).expect("Invalid start");
         let end = self.node_to_index(end).expect("Invalid stop");
+        let vis_2: Option<T> = visiting_twice
+            .map(|v| self.node_to_index(v).expect("Invalid visit twice"));
 
-        let mut visited = vec!(false; self.nodes.len());
+        let mut visited = vec!(0u8; self.nodes.len());
         let mut children_stack = vec!((start, self.neighbors(&start)));
         let mut num_paths = 0;
 
-        visited[start.to_usize().unwrap()] = true;
+        visited[start.to_usize().unwrap()] = 1;
 
         while let Some((root, children)) = children_stack.last_mut() {
+            assert!(visited.iter().filter(|v| **v == 2).count() <= 1, "More than one node with two visits");
+
             if let Some(child) = children.next() {
                 let child_idx = child.to_usize().unwrap();
-                if visited[child_idx] {
+                if visited[child_idx] > 0 && (vis_2 != Some(*child) || visited[child_idx] >= 2) {
                     // already visited node
+                    // only for small caves and one node can be visited twice if set
                     continue;
-                } 
+                }
 
                 if *child == end {
-                    num_paths += 1;
+                    if vis_2.map_or(true, |idx| visited[idx.to_usize().unwrap()] == 2) {
+                        num_paths += 1;
+                    }
                 } else {
                     children_stack.push((*child, self.neighbors(child)));
                     if self.is_small[child_idx] {
-                        visited[child_idx] = true;
+                        visited[child_idx] += 1;
                     }
                 }
             } else {
-                visited[root.to_usize().unwrap()] = false;
+                let root = root.to_usize().unwrap();
+                if self.is_small[root] {
+                    visited[root] -= 1;
+                }
                 children_stack.pop();
             }
         }
