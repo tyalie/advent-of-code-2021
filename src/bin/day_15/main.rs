@@ -4,6 +4,7 @@
 #![feature(binary_heap_retain)]
 
 mod container;
+mod CostField;
 mod a_star;
 
 use teensy4_panic as _;
@@ -31,12 +32,12 @@ struct Solution {
 
 impl aoc21::solutions::Solution<Cave> for Solution {
     fn part_a(&self, _: &mut Hardware, data: &mut Cave) {
-        let goal = Position { x: data.cols() - 1, y: data.rows() - 1};
+/*        let goal = Position { x: data.cols() - 1, y: data.rows() - 1};
         let cost = calc_cost_a_star(data, &Position::from((0,0)), &goal)
             .expect("Couldn't find a path");
 
         usbwriteln!(" - cost for transversing the graph is: {}", cost);
-
+*/
     }
     fn part_b(&self, _: &mut Hardware, data: &mut Cave) {
         let data = data.expand();

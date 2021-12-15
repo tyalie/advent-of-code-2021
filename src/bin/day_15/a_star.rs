@@ -1,6 +1,7 @@
 extern crate alloc;
 
 use crate::container::*;
+use crate::CostField::*;
 
 use alloc::collections::binary_heap::BinaryHeap;
 use alloc::collections::BTreeMap;
@@ -20,7 +21,6 @@ pub struct Position {
 pub struct State {
     pub position: Position,
     pub cost: u16,
-    pub raw_cost: u16 
 }
 
 impl Ord for State {
@@ -93,6 +93,12 @@ impl From<(u16, u16)> for Position {
     }
 }
 
+impl Into<(u16, u16)> for Position {
+    fn into(self) -> (u16, u16) {
+        return (self.x, self.y)
+    }
+}
+
 impl Position {
     pub fn retrieve<'a, T>(&self, data: &'a Vec<Vec<T>>) -> Option<&'a T> {
         data.get(self.x as usize)?.get(self.y as usize)
@@ -146,27 +152,34 @@ pub fn calc_cost_a_star(graph: &Cave, start: &Position, goal: &Position) -> Opti
     usbwrite!("\n{}\n", runtime::ALLOCATOR.free());
     let heuristic = |from: &Position| -> u16 { taxi_distance(from, goal) * 3 };
 
-    let mut costs: BTreeMap<Position, u16> = BTreeMap::new();
+    let mut costs = CostField::new(&(graph.rows(), graph.cols()), &(300, 300));
     let mut heap = BinaryHeap::new();
-    usbwrite!("{}\n", runtime::ALLOCATOR.free());
-
-    costs.insert(*start, 0);
-    heap.push(State { cost: 0, raw_cost: 0, position: *start });
+    
+    *costs.get_mut(Into::<(u16, u16)>::into(*start)).unwrap() = 0;
+    heap.push(State { cost: heuristic(start), position: *start });
 
     let mut goaliest_point: (Position, u16) = (*start, taxi_distance(start, goal));
+    let mut last_free_mem = runtime::ALLOCATOR.free();
 
-    while let Some(State { cost, raw_cost, position }) = heap.pop() {
-/*        let goal_dist = taxi_distance(&position, goal);
+    while let Some(State { cost, position }) = heap.pop() {
+        let goal_dist = taxi_distance(&position, goal);
+        let raw_cost = cost - heuristic(&position);  // more memory efficient
+
         if goal_dist < goaliest_point.1 {
             goaliest_point = (position, goal_dist);
 //            remove_all_distant_positions(&goaliest_point.0, &mut costs);
+            costs.move_field(&Into::<(u16, u16)>::into(position));
             usbwrite!(
-                "g_dist = {} | free_mem = {}b | #heap = {} | #costs = {} \n", 
-                goal_dist, runtime::ALLOCATOR.free(), heap.len(), costs.len()
+                "g_dist = {} | free_mem = {}b | #heap = {}\n", 
+                goal_dist, runtime::ALLOCATOR.free(), heap.len()
             );
-        }*/
+        }
 
-        if raw_cost > *costs.get(&position).unwrap_or(&u16::MAX) { continue; }
+        if abs_difference(last_free_mem, runtime::ALLOCATOR.free()) > 1000 {
+            usbwrite!("- remaining: {}b | #heap: {} \n", runtime::ALLOCATOR.free(), heap.len());
+        }
+
+        if raw_cost > *costs.get(Into::<(u16, u16)>::into(position)).unwrap_or(&u16::MAX) { continue; }
 
         if position == *goal { 
            // debug_matrix(graph, &costs);
@@ -180,15 +193,17 @@ pub fn calc_cost_a_star(graph: &Cave, start: &Position, goal: &Position) -> Opti
         for ajds in graph.adjacent(&position) {
             let cost = raw_cost + graph.cost(&ajds) as u16;
             let next = State {
-                cost: cost + heuristic(&ajds),
-                raw_cost: cost, position: ajds
+                cost: cost + heuristic(&ajds), position: ajds
             };
 
             
-            if cost < *costs.get(&next.position).unwrap_or(&u16::MAX) {
-                costs.insert(next.position.clone(), cost);
+            if cost < *costs.get(Into::into(next.position)).unwrap_or(&u16::MAX) {
+                if let Some(v) = costs.get_mut(Into::into(next.position)) {
+                    *v = cost;
+                }
                 // clean up heap
                 heap.retain(|v| v.position != position || v.cost < next.cost);
+                heap.shrink_to_fit();
                 heap.push(next);
             }
         }
@@ -196,5 +211,4 @@ pub fn calc_cost_a_star(graph: &Cave, start: &Position, goal: &Position) -> Opti
     
     None
 }
-
 
