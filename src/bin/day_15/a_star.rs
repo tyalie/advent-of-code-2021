@@ -153,7 +153,7 @@ pub fn calc_cost_a_star(graph: &Cave, start: &Position, goal: &Position) -> Opti
     let heuristic = |from: &Position| -> u16 { taxi_distance(from, goal) * 3 };
 
     let mut costs = CostField::new(&(graph.rows(), graph.cols()), &(300, 300));
-    let mut heap = BinaryHeap::new();
+    let mut heap = Vec::new();
     
     *costs.get_mut(Into::<(u16, u16)>::into(*start)).unwrap() = 0;
     heap.push(State { cost: heuristic(start), position: *start });
@@ -161,7 +161,9 @@ pub fn calc_cost_a_star(graph: &Cave, start: &Position, goal: &Position) -> Opti
     let mut goaliest_point: (Position, u16) = (*start, taxi_distance(start, goal));
     let mut last_free_mem = runtime::ALLOCATOR.free();
 
-    while let Some(State { cost, position }) = heap.pop() {
+    while let Some((idx, &State { cost, position })) = heap.iter().enumerate().max_by_key(|&(_, v)| v) {
+        heap.remove(idx);
+
         let goal_dist = taxi_distance(&position, goal);
         let raw_cost = cost - heuristic(&position);  // more memory efficient
 
@@ -169,15 +171,16 @@ pub fn calc_cost_a_star(graph: &Cave, start: &Position, goal: &Position) -> Opti
             goaliest_point = (position, goal_dist);
 //            remove_all_distant_positions(&goaliest_point.0, &mut costs);
             costs.move_field(&Into::<(u16, u16)>::into(position));
-            usbwrite!(
+          /*  usbwrite!(
                 "g_dist = {} | free_mem = {}b | #heap = {}\n", 
                 goal_dist, runtime::ALLOCATOR.free(), heap.len()
-            );
+            );*/
         }
 
+        /*
         if abs_difference(last_free_mem, runtime::ALLOCATOR.free()) > 1000 {
             usbwrite!("- remaining: {}b | #heap: {} \n", runtime::ALLOCATOR.free(), heap.len());
-        }
+        }*/
 
         if raw_cost > *costs.get(Into::<(u16, u16)>::into(position)).unwrap_or(&u16::MAX) { continue; }
 
