@@ -24,12 +24,44 @@ pub use super::utils::container::Hardware;
 #[global_allocator]
 pub static ALLOCATOR: CortexMHeap = CortexMHeap::empty();
 
+/** Available memory areas 
+ * for heap initialization.
+ *
+ * RAM1 is regarded faster, but shares
+ * it's space with other things.
+ *
+ * RAM2 is slower, but isn't used by the compiler.
+ *
+ * For the teensy 4.1 the RAM locations can 
+ * also be found in the [linker
+ * script](https://github.com/mciantyre/teensy4-rs/blob/master/t4link.x)
+ *
+ * For further details read 
+ * [the Teensy4.1 page](https://www.pjrc.com/store/teensy41.html#memory)
+ *
+ * RAM1 is DTCM and RAM2 is OCRAM2 in the I.MX RT1060 reference manual
+ * 
+ */
+pub enum Memory {
+    RAM1(usize),
+    RAM2
+}
 
-pub fn run<O, T>(solution: &mut T) -> ! where O:ParsedData, T : Solution<O> {
+pub fn run<O, T>(solution: &mut T, heap_memory: Memory) -> ! where O:ParsedData, T : Solution<O> {
     // init allocator
-    // let start = cortex_m_rt::heap_start() as usize;
-    let start = 0x2020_5000 as usize;
-    let size = 0x2027_FFFF - start; // in bytes
+    let (start, mut size) = match heap_memory {
+        Memory::RAM1(size) => (cortex_m_rt::heap_start() as usize, size),
+        Memory::RAM2 => (0x2020_0000 + 0x5000, 0)
+    };
+
+    if size == 0 {
+        /* universal size calculation independent 
+         * wether we are on OCRAM2 (RAM2) or DTCM (RAM1)
+         * as they always end on …7_FFFF
+         * - see I.MX RT1060 ref man - page 36 */
+        size = 0x7_FFFF - (start % 0x8_0000) - 10_000;
+    }
+
     unsafe { ALLOCATOR.init(start, size) }
 
     // do rest
