@@ -4,7 +4,7 @@ bin="day_$(day)"
 OUT_DIR=target/bins/
 TARGET_FILE=$(OUT_DIR)/$(bin).hex
 
-.PHONY: build objcopy upload-only run
+.PHONY: build objcopy upload-only run inspect
 
 run: build objcopy upload-only
 
@@ -24,3 +24,6 @@ upload-only:
 
 clean:
 	cargo clean
+
+inspect: build
+	@cargo objdump --bin $(bin) -- -d 
