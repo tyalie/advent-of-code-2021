@@ -26,7 +26,8 @@ pub static ALLOCATOR: CortexMHeap = CortexMHeap::empty();
 
 pub fn run<O, T>(solution: &mut T) -> ! where O:ParsedData, T : Solution<O> {
     // init allocator
-    let start = cortex_m_rt::heap_start() as usize;
+    // let start = cortex_m_rt::heap_start() as usize;
+    let start = 0x2020_5000 as usize;
     let size = 400_000; // in bytes
     unsafe { ALLOCATOR.init(start, size) }
 
@@ -41,7 +42,7 @@ pub fn run<O, T>(solution: &mut T) -> ! where O:ParsedData, T : Solution<O> {
     // unsafe { WRITER = Some(writer) };
 
     usbwrite!("You might not see this message if the USB device isn't configured by the host");
-    systick.delay(1000);
+    systick.delay(3000);
 
     let pins = bsp::t41::into_pins(p.iomuxc);
     let led = bsp::configure_led(pins.p13); 
@@ -51,6 +52,7 @@ pub fn run<O, T>(solution: &mut T) -> ! where O:ParsedData, T : Solution<O> {
     );
 
     usbwrite!("Hello");
+    usbwriteln!("Initialized heap with {} bytes at {:x}", size, start);
 
     let mut hardware = Hardware {
         led: led, systick: systick,
@@ -62,8 +64,9 @@ pub fn run<O, T>(solution: &mut T) -> ! where O:ParsedData, T : Solution<O> {
         let in_file =  usb_input::load_input(&mut hardware);
 
         if let Some(data) = in_file {
-            usbwriteln!("Initialized heap with {} bytes at {}", size, start);
+            usbwriteln!("Initialized heap with {} bytes at {:x}", size, start);
             usbwriteln!("Loaded file with {:?} chars\n", data.len());
+            hardware.systick.delay(1000);
             run_tests(&mut hardware, solution, data);
         } else {
         }
@@ -105,7 +108,7 @@ fn run_tests<O, T>(hardware: &mut Hardware, solution: &mut T, data: alloc::strin
 
 #[alloc_error_handler]
 fn oom(_: Layout) -> ! {
-    panic!("Alloc error handler called");
+    panic!("Alloc error handler called. {}b remaining", ALLOCATOR.free());
 }
 
 #[panic_handler]
