@@ -4,14 +4,14 @@
 #![feature(binary_heap_retain)]
 
 mod container;
-mod CostField;
+mod cost_field;
 mod a_star;
 
 use teensy4_panic as _;
 use cortex_m_rt::entry;
 use core::fmt::Write;
 
-use aoc21::{utils::Hardware, usbwriteln, usbwrite};
+use aoc21::{utils::Hardware, usbwriteln};
 
 use container::*;
 use a_star::*;
@@ -24,7 +24,7 @@ fn wrapper() -> ! {
 
 fn main() -> ! {
     let mut sol = Solution {};
-    aoc21::runtime::run(&mut sol);
+    aoc21::runtime::run(&mut sol, aoc21::runtime::Memory::RAM1(400_000));
 }
 
 struct Solution {

@@ -1,15 +1,15 @@
 extern crate alloc;
 
 use crate::container::*;
-use crate::CostField::*;
+use crate::cost_field::*;
 
 use alloc::collections::binary_heap::BinaryHeap;
 use alloc::collections::BTreeMap;
 use alloc::vec::Vec;
-use aoc21::usbwrite;
-use aoc21::utils::Hardware;
 use core::fmt::Write;
 use aoc21::runtime;
+use aoc21::usbwrite;
+use aoc21::utils::Hardware;
 
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
@@ -104,9 +104,18 @@ impl Position {
     pub fn retrieve<'a, T>(&self, data: &'a Vec<Vec<T>>) -> Option<&'a T> {
         data.get(self.x as usize)?.get(self.y as usize)
     }
+}
 
-    pub fn retrieve_mut<'a, T>(&self, data: &'a mut Vec<Vec<T>>) -> &'a mut T {
-        &mut data[self.x as usize][self.y as usize]
+impl core::ops::Index<Position> for CostField {
+    type Output = u16;
+    fn index(&self, index: Position) -> &Self::Output {
+        self.get(index.x, index.y)
+    }
+}
+
+impl core::ops::IndexMut<Position> for CostField {
+    fn index_mut(&mut self, index: Position) -> &mut Self::Output {
+        self.get_mut(index.x, index.y)
     }
 }
 
@@ -122,11 +131,7 @@ fn taxi_distance(a: &Position, b: &Position) -> u16 {
     abs_difference(a.x, b.x) as u16 + abs_difference(a.y, b.y) as u16
 }
 
-fn remove_all_distant_positions<T>(current: &Position, costs: &mut BTreeMap<Position, T>) {
-    const CUT_OFF: u16 = 200;
-    costs.drain_filter(|k, _| { taxi_distance(current, &k) > CUT_OFF });
-}
-
+#[allow(dead_code)]
 fn debug_matrix(graph: &Cave, costs: &BTreeMap<Position, u16>) {
     usbwrite!("\n");
     for x in 0..graph.rows() {
@@ -145,21 +150,18 @@ fn debug_matrix(graph: &Cave, costs: &BTreeMap<Position, u16>) {
     }
 }
 
-static mut FIELD: [[u16; 400]; 400] = [[u16::MAX; 400]; 400];
-
 /// A* implementation
 ///
 /// # Return
 /// Lowest cost of moving through the graph
 pub fn calc_cost_a_star(hwd: &mut Hardware, graph: &Cave, start: &Position, goal: &Position) -> Option<u16> {
-    usbwrite!("\n{}\n", runtime::ALLOCATOR.free());
-    let heuristic = |from: &Position| -> u16 { taxi_distance(from, goal) * 3 };
+    usbwrite!("{}\n", runtime::ALLOCATOR.free());
+    let heuristic = |from: &Position| -> u16 { taxi_distance(from, goal) };
 
-    let mut costs = unsafe { CostField::new(&(graph.rows(), graph.cols()), &mut FIELD) };
+    let mut costs = CostField::new(&(graph.rows(), graph.cols()));
     let mut heap = BinaryHeap::new();
-    usbwrite!("\n{}\n", runtime::ALLOCATOR.free());
-    
-    *costs.get_mut(Into::<(u16, u16)>::into(*start)).unwrap() = 0;
+  
+    costs[*start] = 0;
     heap.push(State { cost: heuristic(start), position: *start });
 
     let mut goaliest_point: (Position, u16) = (*start, taxi_distance(start, goal));
@@ -177,8 +179,6 @@ pub fn calc_cost_a_star(hwd: &mut Hardware, graph: &Cave, start: &Position, goal
 
         if goal_dist < goaliest_point.1 {
             goaliest_point = (position, goal_dist);
-//            remove_all_distant_positions(&goaliest_point.0, &mut costs);
-            costs.move_field(&Into::<(u16, u16)>::into(position));
 /*            usbwrite!(
                 "g_dist = {} | free_mem = {}b | #heap = {}\n", 
                 goal_dist, runtime::ALLOCATOR.free(), heap.len()
@@ -190,7 +190,7 @@ pub fn calc_cost_a_star(hwd: &mut Hardware, graph: &Cave, start: &Position, goal
             usbwrite!("- remaining: {}b | #heap: {} \n", runtime::ALLOCATOR.free(), heap.len());
         }*/
 
-        if raw_cost > *costs.get(Into::<(u16, u16)>::into(position)).unwrap_or(&u16::MAX) { continue; }
+        if raw_cost > costs[position]{ continue; }
 
         if position == *goal { 
            // debug_matrix(graph, &costs);
@@ -207,13 +207,12 @@ pub fn calc_cost_a_star(hwd: &mut Hardware, graph: &Cave, start: &Position, goal
                 cost: cost + heuristic(&ajds), position: ajds
             };
 
-            
-            if cost < *costs.get(Into::into(next.position)).unwrap_or(&u16::MAX) {
-                if let Some(v) = costs.get_mut(Into::into(next.position)) {
-                    *v = cost;
-                }
+           
+            if cost < costs[next.position] {
+                costs[next.position] = cost;
+
                 // clean up heap
-                heap.retain(|v| v.position != position || v.cost < next.cost);
+                heap.retain(|v| v.position != position || v.cost <= next.cost);
                 heap.push(next);
             }
         }
