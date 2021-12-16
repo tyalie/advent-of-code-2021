@@ -7,6 +7,7 @@ use teensy4_panic as _;
 use cortex_m_rt::entry;
 
 use aoc21::utils::Hardware;
+use aoc21::runtime::Memory;
 
 use container::*;
 
@@ -18,7 +19,7 @@ fn wrapper() -> ! {
 
 fn main() -> ! {
     let mut sol = Solution {};
-    aoc21::runtime::run(&mut sol);
+    aoc21::runtime::run(&mut sol, Memory::RAM1(300_000));
 }
 
 struct Solution {

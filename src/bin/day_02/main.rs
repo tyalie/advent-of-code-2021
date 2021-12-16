@@ -8,6 +8,7 @@ use cortex_m_rt::entry;
 use core::fmt::Write;
 
 use aoc21::utils::Hardware;
+use aoc21::runtime::Memory;
 use aoc21::usbwriteln;
 
 use container::{Course, Command};
@@ -20,7 +21,7 @@ fn wrapper() -> ! {
 
 fn main() -> ! {
     let mut sol = Solution {};
-    aoc21::runtime::run(&mut sol);
+    aoc21::runtime::run(&mut sol, Memory::RAM1(400_000));
 }
 
 struct Solution {

@@ -12,6 +12,7 @@ use alloc::vec;
 use alloc::vec::Vec;
 
 use aoc21::{utils::Hardware, usbwriteln};
+use aoc21::runtime::Memory;
 
 use container::*;
 
@@ -23,7 +24,7 @@ fn wrapper() -> ! {
 
 fn main() -> ! {
     let mut sol = Solution {};
-    aoc21::runtime::run(&mut sol);
+    aoc21::runtime::run(&mut sol, Memory::RAM1(400_000));
 }
 
 struct Solution {

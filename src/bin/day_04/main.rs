@@ -10,6 +10,7 @@ use core::fmt::Write;
 use alloc::vec::Vec;
 
 use aoc21::utils::Hardware;
+use aoc21::runtime::Memory;
 use aoc21::usbwriteln;
 
 use container::*;
@@ -22,7 +23,7 @@ fn wrapper() -> ! {
 
 fn main() -> ! {
     let mut sol = Solution {};
-    aoc21::runtime::run(&mut sol);
+    aoc21::runtime::run(&mut sol, Memory::RAM1(400_000));
 }
 
 struct Solution {
@@ -45,7 +46,7 @@ impl aoc21::solutions::Solution<Bingo> for Solution {
     }
 }
 
-fn evaluate_board(board: &Board, draws: &Vec<u8>) -> Option<(usize, u16, u8)> {
+fn evaluate_board(board: &Board, draws: &Vec<u8>) -> Option<(usize, u32, u8)> {
     let mut selected: [bool; 25] = [false; 25];
     
     for (idx, n) in draws.iter().enumerate() {
@@ -53,10 +54,10 @@ fn evaluate_board(board: &Board, draws: &Vec<u8>) -> Option<(usize, u16, u8)> {
             selected[idx] = true;
         }
         if is_winning(&selected) {
-            let num_sum: u16 = board.numbers.iter().flatten().enumerate()
+            let num_sum: u32 = board.numbers.iter().flatten().enumerate()
                 .filter(|(idx,_)| !selected[*idx])
-                .map(|(_,v)| *v as u16).sum();
-            let score= num_sum * (*n as u16);
+                .map(|(_,v)| *v as u32).sum();
+            let score= num_sum * (*n as u32);
             return Some((idx, score, *n));
         }
     }
