@@ -4,7 +4,6 @@ use crate::container::*;
 use crate::cost_field::*;
 
 use alloc::collections::binary_heap::BinaryHeap;
-use alloc::collections::BTreeMap;
 use alloc::vec::Vec;
 use core::fmt::Write;
 use aoc21::runtime;
@@ -132,22 +131,15 @@ fn taxi_distance(a: &Position, b: &Position) -> u16 {
 }
 
 #[allow(dead_code)]
-fn debug_matrix(graph: &Cave, costs: &BTreeMap<Position, u16>) {
-    usbwrite!("\n");
-    for x in 0..graph.rows() {
-        for y in 0..graph.cols() {
-            if let Some(v) = costs.get(&Position::from((x, y))) { 
-                if *v < u16::MAX {
-                    usbwrite!("█");
-                } else {
-                    usbwrite!(" ");
-                }
-            } else {
-                usbwrite!(" ");
-            }
+fn debug_matrix(graph: &Cave, costs: &CostField) {
+    usbwrite!("GRAPH_START\n");
+    for y in 0..graph.rows() {
+        for x in 0..graph.cols() {
+            usbwrite!("{},", costs.get(x, y));
         }
         usbwrite!("\n");
     }
+    usbwrite!("GRAPH_END\n");
 }
 
 /// A* implementation
@@ -164,7 +156,6 @@ pub fn calc_cost_a_star(hwd: &mut Hardware, graph: &Cave, start: &Position, goal
     costs[*start] = 0;
     heap.push(State { cost: heuristic(start), position: *start });
 
-    let mut goaliest_point: (Position, u16) = (*start, taxi_distance(start, goal));
     let mut counter = 0u64;
 
     while let Some(State { cost, position }) = heap.pop() {
@@ -174,21 +165,7 @@ pub fn calc_cost_a_star(hwd: &mut Hardware, graph: &Cave, start: &Position, goal
             hwd.led.toggle();
         }
 
-        let goal_dist = taxi_distance(&position, goal);
         let raw_cost = cost - heuristic(&position);  // more memory efficient
-
-        if goal_dist < goaliest_point.1 {
-            goaliest_point = (position, goal_dist);
-/*            usbwrite!(
-                "g_dist = {} | free_mem = {}b | #heap = {}\n", 
-                goal_dist, runtime::ALLOCATOR.free(), heap.len()
-            ); */
-        }
-
-        
-/*        if abs_difference(last_free_mem, runtime::ALLOCATOR.free()) > 1000 {
-            usbwrite!("- remaining: {}b | #heap: {} \n", runtime::ALLOCATOR.free(), heap.len());
-        }*/
 
         if raw_cost > costs[position]{ continue; }
 
