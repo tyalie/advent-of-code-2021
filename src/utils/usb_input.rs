@@ -54,6 +54,8 @@ pub fn load_input(hardware: &mut Hardware) -> Option<String> {
     let length = get_input_size(hardware);
 
     usbwriteln!("Waiting for {:?} bytes", length);
+    hardware.systick.delay(100);
+    
 
     let in_file = read_bytes(hardware, length);
 
