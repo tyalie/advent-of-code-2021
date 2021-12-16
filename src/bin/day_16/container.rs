@@ -1,6 +1,6 @@
 extern crate alloc;
 
-use core::{fmt::Display, iter::{Peekable, Take}};
+use core::fmt::Display;
 use alloc::vec::Vec;
 use alloc::string::String;
 use num_traits::{PrimInt, Unsigned, CheckedShl};
@@ -11,9 +11,9 @@ fn bits2u<T>(bits: impl Iterator<Item = u8>) -> T where T: PrimInt + Unsigned + 
     bits.fold(T::zero(), |acc, v| CheckedShl::checked_shl(&acc, 1).unwrap() | T::from(v).unwrap())
 }
 
-#[derive(Clone)]
 pub struct Transmission {
-    pub data: Vec<u8>
+    pub data: Vec<u8>,
+    pub root: Package,
 }
 
 impl aoc21::solutions::ParsedData for Transmission {
@@ -23,7 +23,9 @@ impl aoc21::solutions::ParsedData for Transmission {
             (0..4).rev().map(move |i| ((v >> i) & 0b1) as u8)
         }).collect();
 
-        Transmission { data }
+        let root = Package::build_tree(data.iter());
+
+        Transmission { data, root }
     }
 }
 
