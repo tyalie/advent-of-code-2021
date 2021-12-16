@@ -25,7 +25,7 @@ macro_rules! usbwrite {
 #[macro_export]
 macro_rules! usbwriteln {
     ($($arg:tt)*) => {
-        $crate::usbwrite!("\n");
         $crate::usbwrite!($($arg)*);
+        $crate::usbwrite!("\n");
     }
 }
