@@ -7,6 +7,7 @@ use alloc::collections::binary_heap::BinaryHeap;
 use alloc::collections::BTreeMap;
 use alloc::vec::Vec;
 use aoc21::usbwrite;
+use aoc21::utils::Hardware;
 use core::fmt::Write;
 use aoc21::runtime;
 
@@ -144,25 +145,32 @@ fn debug_matrix(graph: &Cave, costs: &BTreeMap<Position, u16>) {
     }
 }
 
+static mut FIELD: [[u16; 400]; 400] = [[u16::MAX; 400]; 400];
+
 /// A* implementation
 ///
 /// # Return
 /// Lowest cost of moving through the graph
-pub fn calc_cost_a_star(graph: &Cave, start: &Position, goal: &Position) -> Option<u16> {
+pub fn calc_cost_a_star(hwd: &mut Hardware, graph: &Cave, start: &Position, goal: &Position) -> Option<u16> {
     usbwrite!("\n{}\n", runtime::ALLOCATOR.free());
     let heuristic = |from: &Position| -> u16 { taxi_distance(from, goal) * 3 };
 
-    let mut costs = CostField::new(&(graph.rows(), graph.cols()), &(300, 300));
-    let mut heap = Vec::new();
+    let mut costs = unsafe { CostField::new(&(graph.rows(), graph.cols()), &mut FIELD) };
+    let mut heap = BinaryHeap::new();
+    usbwrite!("\n{}\n", runtime::ALLOCATOR.free());
     
     *costs.get_mut(Into::<(u16, u16)>::into(*start)).unwrap() = 0;
     heap.push(State { cost: heuristic(start), position: *start });
 
     let mut goaliest_point: (Position, u16) = (*start, taxi_distance(start, goal));
-    let mut last_free_mem = runtime::ALLOCATOR.free();
+    let mut counter = 0u64;
 
-    while let Some((idx, &State { cost, position })) = heap.iter().enumerate().max_by_key(|&(_, v)| v) {
-        heap.remove(idx);
+    while let Some(State { cost, position }) = heap.pop() {
+        counter += 1;
+
+        if counter % 1000 == 0 {
+            hwd.led.toggle();
+        }
 
         let goal_dist = taxi_distance(&position, goal);
         let raw_cost = cost - heuristic(&position);  // more memory efficient
@@ -171,14 +179,14 @@ pub fn calc_cost_a_star(graph: &Cave, start: &Position, goal: &Position) -> Opti
             goaliest_point = (position, goal_dist);
 //            remove_all_distant_positions(&goaliest_point.0, &mut costs);
             costs.move_field(&Into::<(u16, u16)>::into(position));
-          /*  usbwrite!(
+/*            usbwrite!(
                 "g_dist = {} | free_mem = {}b | #heap = {}\n", 
                 goal_dist, runtime::ALLOCATOR.free(), heap.len()
-            );*/
+            ); */
         }
 
-        /*
-        if abs_difference(last_free_mem, runtime::ALLOCATOR.free()) > 1000 {
+        
+/*        if abs_difference(last_free_mem, runtime::ALLOCATOR.free()) > 1000 {
             usbwrite!("- remaining: {}b | #heap: {} \n", runtime::ALLOCATOR.free(), heap.len());
         }*/
 
@@ -206,7 +214,6 @@ pub fn calc_cost_a_star(graph: &Cave, start: &Position, goal: &Position) -> Opti
                 }
                 // clean up heap
                 heap.retain(|v| v.position != position || v.cost < next.cost);
-                heap.shrink_to_fit();
                 heap.push(next);
             }
         }

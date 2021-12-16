@@ -31,19 +31,19 @@ struct Solution {
 }
 
 impl aoc21::solutions::Solution<Cave> for Solution {
-    fn part_a(&self, _: &mut Hardware, data: &mut Cave) {
+    fn part_a(&self, hwd: &mut Hardware, data: &mut Cave) {
         let goal = Position { x: data.cols() - 1, y: data.rows() - 1};
-        let cost = calc_cost_a_star(data, &Position::from((0,0)), &goal)
+        let cost = calc_cost_a_star(hwd, data, &Position::from((0,0)), &goal)
             .expect("Couldn't find a path");
 
         usbwriteln!(" - cost for transversing the graph is: {}", cost);
     }
 
-    fn part_b(&self, _: &mut Hardware, data: &mut Cave) {
+    fn part_b(&self, hwd: &mut Hardware, data: &mut Cave) {
         let data = data.expand();
 
         let goal = Position { x: data.cols() - 1, y: data.rows() - 1};
-        let cost = calc_cost_a_star(&data, &Position::from((0,0)), &goal)
+        let cost = calc_cost_a_star(hwd, &data, &Position::from((0,0)), &goal)
             .expect("Couldn't find a path");
 
         usbwriteln!(" - cost for transversing expanded graph is: {}", cost);
