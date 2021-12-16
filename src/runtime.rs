@@ -8,6 +8,7 @@ use teensy4_panic::sos;
 
 use alloc_cortex_m::CortexMHeap;
 use alloc::string::String;
+use alloc::vec::Vec;
 use core::fmt::Write;
 use core::alloc::Layout;
 
@@ -28,7 +29,7 @@ pub fn run<O, T>(solution: &mut T) -> ! where O:ParsedData, T : Solution<O> {
     // init allocator
     // let start = cortex_m_rt::heap_start() as usize;
     let start = 0x2020_5000 as usize;
-    let size = 400_000; // in bytes
+    let size = 0x2027_FFFF - start; // in bytes
     unsafe { ALLOCATOR.init(start, size) }
 
     // do rest
@@ -51,8 +52,17 @@ pub fn run<O, T>(solution: &mut T) -> ! where O:ParsedData, T : Solution<O> {
         bsp::hal::ccm::PLL1::ARM_HZ, &mut p.ccm.handle, &mut p.dcdc
     );
 
-    usbwrite!("Hello");
+    usbwriteln!("Hello");
     usbwriteln!("Initialized heap with {} bytes at {:x}", size, start);
+
+    usbwriteln!("----------------------");
+    {
+        usbwriteln!("Testing filling heap");
+        let d: Vec<u8> = Vec::with_capacity(size - 100);
+        usbwrite!("used: {} | free: {} ", d.capacity(), ALLOCATOR.free());
+    }
+    usbwriteln!("⇒ free after del: {}", ALLOCATOR.free());
+    usbwriteln!("----------------------");
 
     let mut hardware = Hardware {
         led: led, systick: systick,
