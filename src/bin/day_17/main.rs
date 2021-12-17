@@ -29,16 +29,25 @@ struct Solution {}
 
 impl aoc21::solutions::Solution<Target> for Solution {
     fn part_a(&self, _: &mut Hardware, data: &mut Target) {
-        let heighest_y = find_heighest_y(data);
-        usbwriteln!(" - track with heighest y position: {}", heighest_y.unwrap());
+        let (track, heighest_y) = find_heighest_y(data).unwrap();
+        usbwriteln!(" - track with heighest y position ({}): {:?}", heighest_y, track);
     }
     fn part_b(&self, _: &mut Hardware, data: &mut Target) {
+        let amount = get_all_possible_velocities(data.clone()).count();
+        usbwriteln!(" - found {} possible velocities", amount);
     }
 }
 
-fn find_heighest_y(target: &Target) -> Option<i32> {
-    (0..200).zip(-200..200).filter_map(|(dx, dy)| {
-        let track = Track::<i32>::start(Vector { dx, dy });
-        Some(target.verify_track(&track)?.1)
-    }).max()
+fn find_heighest_y(target: &Target) -> Option<(Vector<i32>, i32)> {
+    get_all_possible_velocities(target.clone())
+        .max_by_key(|(_, height)| *height)
+}
+
+fn get_all_possible_velocities(target: Target) -> impl Iterator<Item = (Vector<i32>, i32)> {
+    (0..200).flat_map(|dx| (-200..200).map(move |dy| Vector { dx, dy }))
+        .filter_map(move |start| {
+            let track = Track::<i32>::start(start);
+            let result = target.verify_track(&track)?;
+            Some((start, result.1))
+        })
 }

@@ -1,19 +1,19 @@
 use num_traits::{PrimInt, sign, Signed};
 use core::ops::{Add, Sub};
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub struct Track<T> where T: PrimInt {
     pub position: Point<T>,
     velocity: Vector<T>
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub struct Point<T> where T: PrimInt {
     pub x: T, 
     pub y: T
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub struct Vector<T> where T: PrimInt {
     pub dx: T, 
     pub dy: T
@@ -58,9 +58,5 @@ impl<T> Track<T> where T: PrimInt + Signed {
             position: self.position + self.velocity,
             velocity: self.velocity.reduce()
         }
-    }
-
-    pub fn is_stopped(&self) -> bool {
-        self.velocity.dx == T::zero() && self.velocity.dy == T::zero()
     }
 }
