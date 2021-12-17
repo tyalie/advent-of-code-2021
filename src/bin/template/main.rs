@@ -22,8 +22,7 @@ fn main() -> ! {
     aoc21::runtime::run(&mut sol, Memory::RAM1(300_000));
 }
 
-struct Solution {
-}
+struct Solution {}
 
 impl aoc21::solutions::Solution<> for Solution {
     fn part_a(&self, _: &mut Hardware, data: &mut ) {
