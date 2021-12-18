@@ -24,7 +24,7 @@ fn wrapper() -> ! {
 
 fn main() -> ! {
     let mut sol = Solution {};
-    aoc21::runtime::run(&mut sol, aoc21::runtime::Memory::RAM1(400_000));
+    aoc21::runtime::run(&mut sol);
 }
 
 struct Solution {

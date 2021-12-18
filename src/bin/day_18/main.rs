@@ -11,7 +11,6 @@ use cortex_m_rt::entry;
 use core::fmt::Write;
 
 use aoc21::utils::Hardware;
-use aoc21::runtime::Memory;
 
 use container::*;
 
@@ -25,7 +24,7 @@ fn wrapper() -> ! {
 
 fn main() -> ! {
     let mut sol = Solution {};
-    aoc21::runtime::run(&mut sol, Memory::RAM1(300_000));
+    aoc21::runtime::run(&mut sol)
 }
 
 struct Solution {}

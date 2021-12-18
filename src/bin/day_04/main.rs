@@ -10,7 +10,6 @@ use core::fmt::Write;
 use alloc::vec::Vec;
 
 use aoc21::utils::Hardware;
-use aoc21::runtime::Memory;
 use aoc21::usbwriteln;
 
 use container::*;
@@ -23,7 +22,7 @@ fn wrapper() -> ! {
 
 fn main() -> ! {
     let mut sol = Solution {};
-    aoc21::runtime::run(&mut sol, Memory::RAM1(400_000));
+    aoc21::runtime::run(&mut sol)
 }
 
 struct Solution {
