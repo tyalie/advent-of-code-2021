@@ -8,9 +8,13 @@ use aoc21::utils::Hardware;
 use aoc21::utils::tools::parse_with_err;
 use itertools::Itertools;
 
+use crate::beaconmap::*;
+use crate::point::*;
+
 
 pub struct BeaconField {
-    pub sensors: Vec<Sensor>
+    pub sensors: Vec<Sensor>,
+    pub sensor_positions: Option<Vec<Point>>
 }
 
 impl aoc21::solutions::ParsedData for BeaconField {
@@ -27,33 +31,7 @@ impl aoc21::solutions::ParsedData for BeaconField {
             sensors.push(Sensor { beacons });
         }
 
-        BeaconField { sensors }
-    }
-}
-
-pub struct Sensor {
-    pub beacons: Vec<Point>
-}
-
-pub struct Point {
-    pub x: i16,
-    pub y: i16,
-    pub z: i16
-}
-
-impl Debug for Point {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        write!(f, "({:4}, {:4}, {:4})", self.x, self.y, self.z)
-    }
-}
-
-impl Debug for Sensor {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        writeln!(f, "-- Sensor --")?;
-        for point in &self.beacons {
-            writeln!(f, "{:?}", point)?;
-        }
-        Ok(())
+        BeaconField { sensors, sensor_positions: None }
     }
 }
 
