@@ -484,9 +484,9 @@ dependencies = [
 
 [[package]]
 name = "teensy4-bsp"
-version = "0.2.0"
+version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "461610509d62db01ed1aa660c78d0bb04001d279769113ebea3046de57039efd"
+checksum = "2189bca2b9477ea3305f39bdcd2718877e10810c780a5912c75f14aec8f14d46"
 dependencies = [
  "cortex-m 0.6.7",
  "cortex-m-rt",
@@ -508,9 +508,9 @@ dependencies = [
 
 [[package]]
 name = "teensy4-panic"
-version = "0.2.0"
+version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e307eec1203a9b340f41d77d72357fa6e327b1ab9b12d593725a5ce17236b2da"
+checksum = "486e5bedc1be2a115dd3bd0deb96dcf558141b2ea0b11445093cbc2ab2972f50"
 
 [[package]]
 name = "teensy4-pins"
