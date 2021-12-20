@@ -18,7 +18,7 @@ tuple = { version = "0.5.1", default-features = false }
 itertools = { version = "0.10.0", default-features = false, features = ["use_alloc"] }
 
 [dependencies.teensy4-bsp]
-version = "0.2"
+version = "=0.2.0"
 features = ["rt"]
 
 # Don't optimize build dependencies, like proc macros.
