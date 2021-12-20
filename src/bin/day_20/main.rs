@@ -1,14 +1,18 @@
 #![no_std]
 #![no_main]
 #![feature(map_first_last)]
+#![feature(step_trait)]
+
+extern crate alloc;
 
 mod container;
 
-use aoc21::usbwriteln;
 use teensy4_panic as _;
 use cortex_m_rt::entry;
 use core::fmt::Write;
+use alloc::collections::BTreeSet;
 
+use aoc21::usbwriteln;
 use aoc21::utils::Hardware;
 use aoc21::runtime::Memory;
 
@@ -29,8 +33,32 @@ struct Solution {}
 
 impl aoc21::solutions::Solution<ImageAlgo> for Solution {
     fn part_a(&self, _: &mut Hardware, data: &mut ImageAlgo) {
-        usbwriteln!("{}", data);
+        usbwriteln!("{}", data.image);
+        let score = execute_algorithm(data, 2);
+        usbwriteln!("{}", score);
     }
     fn part_b(&self, _: &mut Hardware, data: &mut ImageAlgo) {
     }
+}
+
+fn execute_algorithm(data: &ImageAlgo, steps: usize) -> usize {
+    let mut image = data.image.clone();
+
+    for step in 0..steps {
+        let mut new_data = BTreeSet::new();
+
+        for point in image.iter_pixels() {
+            let value = image.get_box(&point);
+           // usbwriteln!("{:?} = {}", point, value);
+            if data.algo[value as usize] {
+                new_data.insert(point);
+            }
+        }
+
+        image = Image::extend(new_data, &image, data.algo[0]);
+    //    usbwriteln!("-- Step {}\n{}\n", step, image);
+    }
+
+    assert!(!image.infity_val, "Return is ∞");
+    image.data.len()
 }
