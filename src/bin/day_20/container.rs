@@ -1,6 +1,6 @@
 extern crate alloc;
 
-use core::fmt::{Write, Display, Debug};
+use core::fmt::{Display, Debug};
 use core::convert::TryInto;
 use core::iter::Step;
 
@@ -8,7 +8,7 @@ use alloc::collections::BTreeSet;
 use alloc::string::String;
 use itertools::Itertools;
 use num_traits::{PrimInt, Signed};
-use aoc21::{utils::Hardware, usbwriteln};
+use aoc21::utils::Hardware;
 
 
 pub struct ImageAlgo {
