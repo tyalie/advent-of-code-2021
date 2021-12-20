@@ -9,6 +9,7 @@ mod container;
 
 use teensy4_panic as _;
 use cortex_m_rt::entry;
+use core::cmp::min;
 use core::fmt::Write;
 use alloc::collections::BTreeSet;
 
@@ -45,6 +46,7 @@ impl aoc21::solutions::Solution<ImageAlgo> for Solution {
 
 fn execute_algorithm(data: &ImageAlgo, steps: usize) -> usize {
     let mut image = data.image.clone();
+    let mut min_mem = usize::MAX;
 
     for _ in 0..steps {
         let mut new_data = BTreeSet::new();
@@ -56,11 +58,12 @@ fn execute_algorithm(data: &ImageAlgo, steps: usize) -> usize {
             }
         }
 
+        min_mem = min(runtime::ALLOCATOR.free(), min_mem);
         image = Image::extend(new_data, &image, data.algo[0]);
     }
 
     assert!(!image.infity_val, "Return is ∞");
-    usbwriteln!("[{} bytes memory remaining]", runtime::ALLOCATOR.free());
+    usbwriteln!("[had min {} bytes free]", min_mem);
     image.data.len()
     
 }
