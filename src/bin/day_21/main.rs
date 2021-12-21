@@ -39,7 +39,8 @@ impl aoc21::solutions::Solution<DiracDice> for Solution {
     fn part_b(&self, _: &mut Hardware, data: &mut DiracDice) {
         let game = DiracGame::new(data.clone(), Dice::Deterministic);
         let res = game.get_paths_brut_force();
-        usbwriteln!("{:?}", res);
+        let score = res.iter().max().unwrap();
+        usbwriteln!("- winner won {} games", score);
     }
 }
 
