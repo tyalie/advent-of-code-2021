@@ -1,6 +1,5 @@
 extern crate alloc;
 
-use alloc::vec::Vec;
 use alloc::string::String;
 use aoc21::utils::Hardware;
 use aoc21::utils::tools::parse_with_err;
