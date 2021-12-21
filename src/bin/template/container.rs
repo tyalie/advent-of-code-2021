@@ -1,7 +1,5 @@
 extern crate alloc;
 
-use core::fmt::Write;
-
 use alloc::vec::Vec;
 use alloc::string::String;
 use aoc21::utils::Hardware;

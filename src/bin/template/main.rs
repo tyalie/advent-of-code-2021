@@ -5,6 +5,7 @@ mod container;
 
 use teensy4_panic as _;
 use cortex_m_rt::entry;
+use core::fmt::Write;
 
 use aoc21::utils::Hardware;
 use aoc21::runtime::Memory;
