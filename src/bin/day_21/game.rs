@@ -22,9 +22,9 @@ impl DiracGame {
         DiracGame { dice, position: start, scores: [0; 2], dice_rolls: 0 }
     }
 
-    pub fn get_winner_a(mut self) -> Self {
+    pub fn get_winner_a(mut self, max_score: u16) -> Self {
         let mut cur_player = 0;
-        while self.scores.iter().all(|&v| v < 1000) {
+        while self.scores.iter().all(|&v| v < max_score) {
             let moves = self.dice.roll_three(&mut self.dice_rolls);
 
             let position = (self.position.player_pos[cur_player] + moves - 1) % 10 + 1;
