@@ -23,10 +23,12 @@ impl aoc21::solutions::ParsedData for BootupSequence {
                     .split_once("..").unwrap()
                     .map(parse_with_err);
 
-                start..=end
+                assert!(start <= end);
+
+                start..(end + 1)
             }).collect_tuple().unwrap();
 
-            (state == "on", Cube { x, y, z })
+            (state == "on", Cube::new(x, y, z))
         }).collect_vec();
 
         BootupSequence { commands }
