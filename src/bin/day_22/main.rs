@@ -6,6 +6,7 @@ mod container;
 mod cubes;
 
 use cubes::Cube;
+use heapless::Vec as HVec;
 use itertools::Itertools;
 use teensy4_panic as _;
 use cortex_m_rt::entry;
@@ -82,9 +83,15 @@ impl aoc21::solutions::Solution<BootupSequence> for Solution {
 
 fn find_turned_on(commands: &Vec<(bool, Cube)>) -> i64 {
     let mut cubes: BTreeMap<Cube, i8> = BTreeMap::new();
+    let mut key_storage: HVec<_, 10000> = HVec::new();
 
     for (state, cube) in commands {
-        for old in cubes.clone().keys() {
+        key_storage.clear();
+        for cube in cubes.keys() {
+            key_storage.push(cube.clone()).unwrap();
+        }
+        
+        for old in &key_storage {
             if let Some(inter) = old.intersect(cube) {
                 let old = *cubes.get(&old).unwrap();
                 *cubes.entry(inter).or_insert(0) -= old;
